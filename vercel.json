@@ -1,5 +1,6 @@
 {
   "buildCommand": "npm run build",
+  "installCommand": "npm ci --force",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "rewrites": [
