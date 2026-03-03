@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { useApp } from "@/contexts/AppContext"
-import RichTextEditor from "@/components/RichTextEditor"
+import SimpleTextEditor from "@/components/SimpleTextEditor"
 import {
   apiGetArticles,
   apiUpdateArticle,
@@ -205,7 +205,7 @@ export default function ArticleEditorPage() {
             <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Content (English)
             </h2>
-            <RichTextEditor
+            <SimpleTextEditor
               content={formData.bodyEn}
               onChange={(content) => setFormData({ ...formData, bodyEn: content })}
               placeholder="Write your article content in English..."
@@ -217,7 +217,7 @@ export default function ArticleEditorPage() {
             <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Content (Arabic)
             </h2>
-            <RichTextEditor
+            <SimpleTextEditor
               content={formData.bodyAr}
               onChange={(content) => setFormData({ ...formData, bodyAr: content })}
               placeholder="اكتب محتوى المقال بالعربية..."
