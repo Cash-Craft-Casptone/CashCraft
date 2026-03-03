@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { useApp } from "@/contexts/AppContext"
-// Temporarily disabled RichTextEditor due to build issues
-// import RichTextEditor from "@/components/RichTextEditor"
+import RichTextEditor from "@/components/RichTextEditor"
 import {
   apiGetArticles,
   apiUpdateArticle,
@@ -206,11 +205,10 @@ export default function ArticleEditorPage() {
             <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Content (English)
             </h2>
-            <textarea
-              value={formData.bodyEn}
-              onChange={(e) => setFormData({ ...formData, bodyEn: e.target.value })}
+            <RichTextEditor
+              content={formData.bodyEn}
+              onChange={(content) => setFormData({ ...formData, bodyEn: content })}
               placeholder="Write your article content in English..."
-              className="w-full min-h-[500px] p-4 border-2 border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white"
             />
           </div>
 
@@ -219,12 +217,10 @@ export default function ArticleEditorPage() {
             <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Content (Arabic)
             </h2>
-            <textarea
-              value={formData.bodyAr}
-              onChange={(e) => setFormData({ ...formData, bodyAr: e.target.value })}
+            <RichTextEditor
+              content={formData.bodyAr}
+              onChange={(content) => setFormData({ ...formData, bodyAr: content })}
               placeholder="اكتب محتوى المقال بالعربية..."
-              className="w-full min-h-[500px] p-4 border-2 border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-900 dark:text-white"
-              dir="rtl"
             />
           </div>
         </motion.div>
