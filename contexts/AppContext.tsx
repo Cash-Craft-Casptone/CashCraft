@@ -43,6 +43,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     if (savedLanguage) {
       setLanguage(savedLanguage)
+      document.documentElement.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'
+      document.documentElement.lang = savedLanguage === 'ar' ? 'ar' : 'en'
     }
     
     if (savedTheme) {
@@ -127,16 +129,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (tokenParts.length === 3) {
             const tokenData = JSON.parse(atob(tokenParts[1]))
             console.log("AppContext - Token data:", tokenData)
-            if (tokenData.name || tokenData.displayName) {
-              setCurrentUser({
+            
+            // JWT uses specific claim names - check ALL possible role claim names
+            const role = tokenData['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] 
+                      || tokenData['role'] 
+                      || tokenData['Role']
+                      || tokenData['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role']
+                      || 'User'
+            
+            console.log("🎭 Extracted role from API fallback:", role)
+            
+            const isPremium = tokenData.isPremium === 'true' 
+                           || tokenData.isPremium === true 
+                           || tokenData['isPremium'] === 'true'
+                           || tokenData['isPremium'] === true
+                           || false
+            
+            if (tokenData.name || tokenData.displayName || tokenData.email) {
+              const user = {
                 id: tokenData.sub || tokenData.userId,
-                displayName: tokenData.name || tokenData.displayName,
+                displayName: tokenData.displayName || tokenData.name || tokenData.email,
                 email: tokenData.email,
-                username: tokenData.username || tokenData.name || tokenData.displayName,
-                role: tokenData.role || 'user',
-                isPremium: tokenData.isPremium || false,
+                username: tokenData.username || tokenData.name || tokenData.displayName || tokenData.email,
+                role: role,
+                isPremium: isPremium,
                 createdAt: tokenData.createdAt || new Date().toISOString()
-              })
+              }
+              console.log("👤 Setting user from API fallback:", user)
+              setCurrentUser(user)
               return
             }
           }
@@ -162,16 +182,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const tokenParts = token.split('.')
         if (tokenParts.length === 3) {
           const tokenData = JSON.parse(atob(tokenParts[1]))
-          if (tokenData.name || tokenData.displayName) {
-            setCurrentUser({
+          console.log("🔍 Full token data:", tokenData)
+          
+          // JWT uses specific claim names - check ALL possible role claim names
+          const role = tokenData['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] 
+                    || tokenData['role'] 
+                    || tokenData['Role']
+                    || tokenData['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role']
+                    || 'User'
+          
+          console.log("🎭 Extracted role:", role)
+          
+          const isPremium = tokenData.isPremium === 'true' 
+                         || tokenData.isPremium === true 
+                         || tokenData['isPremium'] === 'true'
+                         || tokenData['isPremium'] === true
+                         || false
+          
+          if (tokenData.name || tokenData.displayName || tokenData.email) {
+            const user = {
               id: tokenData.sub || tokenData.userId,
-              displayName: tokenData.name || tokenData.displayName,
+              displayName: tokenData.displayName || tokenData.name || tokenData.email,
               email: tokenData.email,
-              username: tokenData.username || tokenData.name || tokenData.displayName,
-              role: tokenData.role || 'user',
-              isPremium: tokenData.isPremium || false,
+              username: tokenData.username || tokenData.name || tokenData.displayName || tokenData.email,
+              role: role,
+              isPremium: isPremium,
               createdAt: tokenData.createdAt || new Date().toISOString()
-            })
+            }
+            console.log("👤 Setting user:", user)
+            setCurrentUser(user)
           }
         }
       } catch (error) {

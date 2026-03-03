@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:16-alpine
+    container_name: cashcraft-db
+    restart: always
+    environment:
+      POSTGRES_DB: cashcraft
+      POSTGRES_USER: cashcraft_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cashcraft-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cashcraft_user -d cashcraft"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (.NET)
+  backend:
+    build:
+      context: ./backend/CashCraft.Api
+      dockerfile: Dockerfile
+    container_name: cashcraft-backend
+    restart: always
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=database;Port=5432;Database=cashcraft;Username=cashcraft_user;Password=${DB_PASSWORD:-changeme123}
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+      - JwtSettings__Issuer=https://api.yourdomain.com
+      - JwtSettings__Audience=https://yourdomain.com
+      - JwtSettings__ExpiryMinutes=60
+      - GoogleApiKey=${GOOGLE_API_KEY}
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - cashcraft-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cashcraft-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:80/api
+      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+    depends_on:
+      - backend
+    networks:
+      - cashcraft-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy (Optional but recommended)
+  nginx:
+    image: nginx:alpine
+    container_name: cashcraft-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - cashcraft-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  cashcraft-network:
+    driver: bridge

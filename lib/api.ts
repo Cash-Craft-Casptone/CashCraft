@@ -67,6 +67,12 @@ async function request<T>(
       throw new Error(errorMessage)
     }
 
+    // Handle 204 No Content responses (like DELETE)
+    if (response.status === 204) {
+      console.log(`✅ Response: No Content (204)`)
+      return {} as T
+    }
+
     const data = await response.json()
     console.log(`✅ Response data:`, data)
     return data
@@ -113,6 +119,21 @@ export async function apiLogin(email: string, password: string) {
   return response
 }
 
+export async function apiGoogleAuth(idToken: string) {
+  console.log("🔐 Attempting Google authentication")
+  
+  const response = await request<{
+    accessToken: string
+    refreshToken: string
+  }>("auth/google", {
+    method: "POST",
+    body: { idToken }
+  })
+  
+  console.log("✅ Google authentication successful")
+  return response
+}
+
 export async function apiRegister(
   email: string,
   username: string,
@@ -153,6 +174,152 @@ export async function apiRefreshToken(refreshToken: string) {
   
   console.log("✅ Token refreshed")
   return response
+}
+
+// ===== EDUCATIONAL CONTENT (ARTICLES, VIDEOS, QUIZZES) =====
+
+// ---- Articles ----
+
+export interface ArticleDto {
+  id: string
+  slug: string
+  titleEn: string
+  titleAr: string
+  descriptionEn?: string
+  descriptionAr?: string
+  coverUrl?: string
+  bodyEn?: string
+  bodyAr?: string
+  createdAt: string
+  publishedAt?: string
+}
+
+export async function apiGetArticles() {
+  return request<ArticleDto[]>("articles", {
+    method: "GET",
+  })
+}
+
+export async function apiCreateArticle(
+  data: {
+    slug: string
+    titleEn: string
+    titleAr: string
+    descriptionEn?: string
+    descriptionAr?: string
+    coverUrl?: string
+    bodyEn?: string
+    bodyAr?: string
+  },
+  token?: string
+) {
+  return request<ArticleDto>("articles", {
+    method: "POST",
+    body: data,
+    token,
+  })
+}
+
+// ---- Videos ----
+
+export interface VideoDto {
+  id: string
+  slug: string
+  titleEn: string
+  titleAr: string
+  descriptionEn?: string
+  descriptionAr?: string
+  coverUrl?: string
+  url: string
+  thumbnailUrl?: string
+  durationSec?: number
+  createdAt: string
+  publishedAt?: string
+}
+
+export async function apiGetVideos() {
+  return request<VideoDto[]>("videos", {
+    method: "GET",
+  })
+}
+
+export async function apiCreateVideo(
+  data: {
+    slug: string
+    titleEn: string
+    titleAr: string
+    descriptionEn?: string
+    descriptionAr?: string
+    coverUrl?: string
+    url?: string
+    thumbnailUrl?: string
+    durationSec?: number
+  },
+  token?: string
+) {
+  return request<VideoDto>("videos", {
+    method: "POST",
+    body: data,
+    token,
+  })
+}
+
+// ---- Quizzes ----
+
+export interface QuizOptionDto {
+  id: string
+  textEn: string
+  textAr: string
+  isCorrect: boolean
+}
+
+export interface QuizQuestionDto {
+  id: string
+  textEn: string
+  textAr: string
+  options: QuizOptionDto[]
+}
+
+export interface QuizDto {
+  id: string
+  slug: string
+  titleEn: string
+  titleAr: string
+  isPublished: boolean
+  questions: QuizQuestionDto[]
+  createdAt: string
+  publishedAt?: string
+}
+
+export async function apiGetQuizzes(token?: string) {
+  return request<QuizDto[]>("quizzes", {
+    method: "GET",
+    token,
+  })
+}
+
+export async function apiCreateQuiz(
+  data: {
+    slug: string
+    titleEn: string
+    titleAr: string
+    questions: Array<{
+      textEn: string
+      textAr: string
+      options: Array<{
+        textEn: string
+        textAr: string
+        isCorrect: boolean
+      }>
+    }>
+  },
+  token?: string
+) {
+  return request<QuizDto>("quizzes", {
+    method: "POST",
+    body: data,
+    token,
+  })
 }
 
 // ===== BUDGET PLANS =====
@@ -363,3 +530,98 @@ export function isAuthenticated(): boolean {
 }
 
 
+
+
+// ===== UPDATE & DELETE FUNCTIONS =====
+
+// Articles
+export async function apiUpdateArticle(
+  id: string,
+  data: {
+    slug?: string
+    titleEn?: string
+    titleAr?: string
+    descriptionEn?: string
+    descriptionAr?: string
+    coverUrl?: string
+    bodyEn?: string
+    bodyAr?: string
+  },
+  token?: string
+) {
+  return request(`articles/${id}`, {
+    method: "PUT",
+    body: data,
+    token,
+  })
+}
+
+export async function apiDeleteArticle(id: string, token?: string) {
+  return request(`articles/${id}`, {
+    method: "DELETE",
+    token,
+  })
+}
+
+// Videos
+export async function apiUpdateVideo(
+  id: string,
+  data: {
+    slug?: string
+    titleEn?: string
+    titleAr?: string
+    descriptionEn?: string
+    descriptionAr?: string
+    coverUrl?: string
+    url?: string
+    thumbnailUrl?: string
+    durationSec?: number
+  },
+  token?: string
+) {
+  return request(`videos/${id}`, {
+    method: "PUT",
+    body: data,
+    token,
+  })
+}
+
+export async function apiDeleteVideo(id: string, token?: string) {
+  return request(`videos/${id}`, {
+    method: "DELETE",
+    token,
+  })
+}
+
+// Quizzes
+export async function apiUpdateQuiz(
+  id: string,
+  data: {
+    slug?: string
+    titleEn?: string
+    titleAr?: string
+    questions?: Array<{
+      textEn: string
+      textAr: string
+      options: Array<{
+        textEn: string
+        textAr: string
+        isCorrect: boolean
+      }>
+    }>
+  },
+  token?: string
+) {
+  return request(`quizzes/${id}`, {
+    method: "PUT",
+    body: data,
+    token,
+  })
+}
+
+export async function apiDeleteQuiz(id: string, token?: string) {
+  return request(`quizzes/${id}`, {
+    method: "DELETE",
+    token,
+  })
+}

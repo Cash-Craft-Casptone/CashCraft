@@ -8,73 +8,51 @@ import Link from "next/link"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { Navbar } from "@/components/Navbar"
+import { apiGetQuizzes } from "@/lib/api"
 
 export default function QuizPage() {
   const [completedQuizzes, setCompletedQuizzes] = useState<string[]>([])
+  const [quizzes, setQuizzes] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const { language, isDark } = useApp()
   const t = translations[language]
 
   useEffect(() => {
     const completed = JSON.parse(localStorage.getItem("completedQuizzes") || "[]")
     setCompletedQuizzes(completed)
+    loadQuizzes()
   }, [])
 
-  const quizLevels = [
-    {
-      id: "1",
-      title: language === "ar" ? "أساسيات المال" : "Money Basics",
-      description:
-        language === "ar" ? "تعلم المفاهيم الأساسية للمال والادخار" : "Learn basic concepts of money and saving",
-      difficulty: language === "ar" ? "مبتدئ" : "Beginner",
-      questions: 10,
-      timeLimit: "15 min",
-      points: 100,
-      unlocked: true,
-      completed: completedQuizzes.includes("1"),
-    },
-    {
-      id: "2",
-      title: language === "ar" ? "إدارة الميزانية" : "Budget Management",
-      description:
-        language === "ar"
-          ? "اختبر معرفتك في إدارة الميزانية الشخصية"
-          : "Test your knowledge of personal budget management",
-      difficulty: language === "ar" ? "متوسط" : "Intermediate",
-      questions: 15,
-      timeLimit: "20 min",
-      points: 150,
-      unlocked: completedQuizzes.includes("1"),
-      completed: completedQuizzes.includes("2"),
-    },
-    {
-      id: "3",
-      title: language === "ar" ? "الاستثمار للمبتدئين" : "Investment Basics",
-      description:
-        language === "ar"
-          ? "اكتشف عالم الاستثمار والأسواق المالية"
-          : "Discover the world of investment and financial markets",
-      difficulty: language === "ar" ? "متوسط" : "Intermediate",
-      questions: 12,
-      timeLimit: "18 min",
-      points: 120,
-      unlocked: completedQuizzes.includes("2"),
-      completed: completedQuizzes.includes("3"),
-    },
-    {
-      id: "4",
-      title: language === "ar" ? "التخطيط المالي المتقدم" : "Advanced Financial Planning",
-      description:
-        language === "ar"
-          ? "استراتيجيات متقدمة للتخطيط المالي طويل المدى"
-          : "Advanced strategies for long-term financial planning",
-      difficulty: language === "ar" ? "متقدم" : "Advanced",
-      questions: 20,
-      timeLimit: "30 min",
-      points: 200,
-      unlocked: completedQuizzes.includes("3"),
-      completed: completedQuizzes.includes("4"),
-    },
-  ]
+  // Reload completed quizzes when page becomes visible (user returns from quiz)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const completed = JSON.parse(localStorage.getItem("completedQuizzes") || "[]")
+        setCompletedQuizzes(completed)
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("focus", handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("focus", handleVisibilityChange)
+    }
+  }, [])
+
+  const loadQuizzes = async () => {
+    try {
+      setLoading(true)
+      // Don't send token - regular users should only see published quizzes
+      const data = await apiGetQuizzes()
+      setQuizzes(data)
+    } catch (error) {
+      console.error("Failed to load quizzes:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -90,6 +68,46 @@ export default function QuizPage() {
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
     }
+  }
+
+  const quizLevels = quizzes.map((quiz) => {
+    const numQuestions = quiz.questions?.length || 0
+    const points = numQuestions * 10
+    const timeLimit = Math.round(numQuestions * 1.5)
+    
+    // Calculate difficulty based on number of questions
+    let difficulty = language === "ar" ? "مبتدئ" : "Beginner"
+    if (numQuestions >= 11) {
+      difficulty = language === "ar" ? "متقدم" : "Advanced"
+    } else if (numQuestions >= 6) {
+      difficulty = language === "ar" ? "متوسط" : "Intermediate"
+    }
+    
+    return {
+      id: quiz.id,
+      title: language === "ar" ? quiz.titleAr : quiz.titleEn,
+      description: "",
+      difficulty: difficulty,
+      questions: numQuestions,
+      timeLimit: `${timeLimit} min`,
+      points: points,
+      unlocked: true,
+      completed: completedQuizzes.includes(quiz.id),
+    }
+  })
+
+  if (loading) {
+    return (
+      <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+        <Navbar />
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <Brain className="w-16 h-16 text-teal-600 mx-auto mb-4 animate-pulse" />
+            <p className="text-gray-600 dark:text-gray-300">Loading quizzes...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -164,7 +182,7 @@ export default function QuizPage() {
                   ? "border-green-200 dark:border-green-800"
                   : quiz.unlocked
                     ? "border-teal-200 dark:border-teal-800 hover:border-teal-300 dark:hover:border-teal-700"
-                    : "border-gray-200 dark:border-gray-700 opacity-60"
+                    : "border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed"
               }`}
             >
               <div className="flex items-start justify-between mb-4">

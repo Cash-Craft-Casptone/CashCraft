@@ -348,107 +348,13 @@ export default function BudgetPlanningPage() {
           {/* My Budgets Tab */}
           <TabsContent value="budgets" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className={`text-2xl font-bold ${currentLang === "ar" ? "font-cairo" : ""}`}>{t.activeBudgets}</h2>
-              <Dialog open={isCreateBudgetOpen} onOpenChange={setIsCreateBudgetOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    {t.createBudget}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>{t.createBudget}</DialogTitle>
-                    <DialogDescription>Create a new budget plan to track your expenses</DialogDescription>
-                  </DialogHeader>
-
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="budgetName">{t.budgetName}</Label>
-                        <Input
-                          id="budgetName"
-                          value={newBudget.name}
-                          onChange={(e) => setNewBudget({ ...newBudget, name: e.target.value })}
-                          placeholder="e.g., January 2025 Budget"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="budgetType">{t.budgetType}</Label>
-                        <Select
-                          value={newBudget.type}
-                          onValueChange={(value) => setNewBudget({ ...newBudget, type: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="monthly">{t.monthly}</SelectItem>
-                            <SelectItem value="yearly">{t.yearly}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="totalBudget">{t.totalBudget}</Label>
-                        <Input
-                          id="totalBudget"
-                          type="number"
-                          value={newBudget.totalBudget}
-                          onChange={(e) => setNewBudget({ ...newBudget, totalBudget: e.target.value })}
-                          placeholder="5000"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="currency">{t.currency}</Label>
-                        <Select
-                          value={newBudget.currency}
-                          onValueChange={(value) => setNewBudget({ ...newBudget, currency: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="EGP">EGP</SelectItem>
-                            <SelectItem value="USD">USD</SelectItem>
-                            <SelectItem value="EUR">EUR</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <Label>{t.categories}</Label>
-                      <div className="grid grid-cols-2 gap-4">
-                        {newBudget.categories.map((category, index) => (
-                          <div key={index} className="space-y-2">
-                            <Label className="capitalize">{t[category.name as keyof typeof t] || category.name}</Label>
-                            <Input
-                              type="number"
-                              value={category.budgeted}
-                              onChange={(e) => {
-                                const updatedCategories = [...newBudget.categories]
-                                updatedCategories[index].budgeted = e.target.value
-                                setNewBudget({ ...newBudget, categories: updatedCategories })
-                              }}
-                              placeholder="1000"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsCreateBudgetOpen(false)}>
-                      {t.cancel}
-                    </Button>
-                    <Button onClick={handleCreateBudget}>{t.save}</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <h2 className="text-2xl font-bold text-foreground">{t.activeBudgets}</h2>
+              <Link href="/dashboard/budget/create">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  {t.createBudget}
+                </Button>
+              </Link>
             </div>
 
             <motion.div

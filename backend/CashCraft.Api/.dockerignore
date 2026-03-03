@@ -1,0 +1,14 @@
+# Backend .dockerignore
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.cache
+.git/
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+appsettings.Development.json

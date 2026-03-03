@@ -10,7 +10,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, ArrowRight, CheckCircle, XCircle, Clock, Trophy, RotateCcw, Home, Target } from "lucide-react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
+import { apiGetQuizzes } from "@/lib/api"
 
 const translations = {
   en: {
@@ -139,7 +140,7 @@ const mockQuizData = {
 
 export default function QuizDetailPage() {
   const params = useParams()
-  const quizId = Number.parseInt(params.id as string)
+  const quizId = params.id as string
   const [currentLang, setCurrentLang] = useState<"en" | "ar">("en")
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number }>({})
@@ -147,28 +148,63 @@ export default function QuizDetailPage() {
   const [timeRemaining, setTimeRemaining] = useState(0)
   const [quizStartTime, setQuizStartTime] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [quiz, setQuiz] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const t = translations[currentLang]
-  const quiz = mockQuizData[quizId as keyof typeof mockQuizData]
+  const router = useRouter()
 
   useEffect(() => {
-    if (quiz) {
-      setTimeRemaining(quiz.timeLimit)
+    loadQuiz()
+  }, [quizId])
+
+  const loadQuiz = async () => {
+    try {
+      setIsLoading(true)
+      const quizzes = await apiGetQuizzes()
+      const foundQuiz = quizzes.find((q: any) => q.id === quizId)
+      
+      if (!foundQuiz) {
+        setError("Quiz not found")
+        return
+      }
+      
+      // Transform API data to match expected format
+      const transformedQuiz = {
+        title: currentLang === "ar" ? foundQuiz.titleAr : foundQuiz.titleEn,
+        description: "",
+        category: "financial",
+        difficulty: "beginner",
+        timeLimit: foundQuiz.questions.length * 90, // 1.5 minutes per question in seconds
+        questions: foundQuiz.questions.map((q: any, index: number) => ({
+          id: index + 1,
+          question: currentLang === "ar" ? q.textAr : q.textEn,
+          options: q.options.map((o: any) => currentLang === "ar" ? o.textAr : o.textEn),
+          correctAnswer: q.options.findIndex((o: any) => o.isCorrect),
+          explanation: ""
+        }))
+      }
+      
+      setQuiz(transformedQuiz)
+      setTimeRemaining(transformedQuiz.timeLimit)
       setQuizStartTime(new Date())
+    } catch (err: any) {
+      setError(err.message || "Failed to load quiz")
+    } finally {
       setIsLoading(false)
     }
-  }, [quiz])
+  }
 
   useEffect(() => {
-    if (timeRemaining > 0 && !showResults) {
+    if (timeRemaining > 0 && !showResults && quiz) {
       const timer = setTimeout(() => {
         setTimeRemaining(timeRemaining - 1)
       }, 1000)
       return () => clearTimeout(timer)
-    } else if (timeRemaining === 0 && !showResults) {
+    } else if (timeRemaining === 0 && !showResults && quiz) {
       handleSubmitQuiz()
     }
-  }, [timeRemaining, showResults])
+  }, [timeRemaining, showResults, quiz])
 
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
     setSelectedAnswers({
@@ -191,6 +227,13 @@ export default function QuizDetailPage() {
 
   const handleSubmitQuiz = () => {
     setShowResults(true)
+    
+    // Save quiz completion to localStorage
+    const completed = JSON.parse(localStorage.getItem("completedQuizzes") || "[]")
+    if (!completed.includes(quizId)) {
+      completed.push(quizId)
+      localStorage.setItem("completedQuizzes", JSON.stringify(completed))
+    }
   }
 
   const calculateScore = () => {
@@ -223,16 +266,32 @@ export default function QuizDetailPage() {
     return formatTime(diffInSeconds)
   }
 
-  if (isLoading || !quiz) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p>{t.loading}</p>
+          <p className="text-muted-foreground">{t.loading}</p>
         </div>
       </div>
     )
   }
+
+  if (error || !quiz) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+          <p className="text-xl font-semibold mb-4">{error || "Quiz not found"}</p>
+          <Link href="/quiz">
+            <Button>{t.backToQuizzes}</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  const currentQuestionData = quiz.questions[currentQuestion]
 
   if (showResults) {
     const score = calculateScore()

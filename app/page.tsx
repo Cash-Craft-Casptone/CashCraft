@@ -244,8 +244,8 @@ export default function LandingPage() {
             <motion.h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#333] dark:text-white">
               {t.whatWeOffer}
             </motion.h2>
-            <p className="text-xl text-[#333] dark:text-gray-300 max-w-3xl mx-auto">
-              Comprehensive tools and resources to transform your financial journey
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {t.comprehensiveTools}
             </p>
           </motion.div>
 
@@ -297,8 +297,8 @@ export default function LandingPage() {
             <motion.h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
               {t.chooseYourPlan}
             </motion.h2>
-            <p className="text-xl text-gray-200 dark:text-gray-100 max-w-2xl mx-auto">
-              Choose the perfect plan to accelerate your financial success
+            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+              {t.choosePerfectPlan}
             </p>
           </motion.div>
 
@@ -432,14 +432,14 @@ export default function LandingPage() {
           <div className="flex justify-center gap-8 flex-wrap">
             {[
               {
-                  name: "Mostafa Mohamed (Leader)",
+                  name: "Mostafa Mohamed",
                   image: "/2d2e0517-6e9a-4f8e-a003-f716f8098ff9.jpeg",
                 linkedin: "#",
                 instagram: "#",
                 github: "#",
               },
               {
-                name: "Mostafa Mohamed",
+                name: "Habiba Amr",
                   image: "/473406052_619555743878447_664832098335577281_n.jpg",
                 linkedin: "#",
                 instagram: "#",
@@ -566,7 +566,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <motion.h4 className="font-semibold mb-4">Contact Us</motion.h4>
+              <motion.h4 className="font-semibold mb-4">{t.contactUs}</motion.h4>
               <motion.div className="space-y-2 text-muted-foreground">
                 <motion.p>📞 +201223515162</motion.p>
                 <motion.p>📧 cashcraft@gmail.com</motion.p>
@@ -580,15 +580,15 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <motion.h3 className="font-bold mb-4">Remain Updated</motion.h3>
+              <motion.h3 className="font-bold mb-4">{t.remainUpdated}</motion.h3>
               <motion.div className="flex gap-2">
                 <motion.input
                   type="email"
-                  placeholder="Your email address"
-                  className="flex-1 px-3 py-2 rounded bg-gray-800 text-white border border-gray-600"
+                  placeholder={t.yourEmailAddress}
+                  className="flex-1 px-3 py-2 rounded bg-gray-800 text-white border border-gray-600 placeholder:text-gray-400"
                 />
-                <Button className="bg-[#084f5a] hover:bg-[#6099a5]" onClick={() => router.push("/register")}>
-                  Sign up
+                <Button className="bg-primary hover:bg-primary/90" onClick={() => router.push("/register")}>
+                  {t.signUp}
                 </Button>
               </motion.div>
             </motion.div>
@@ -601,7 +601,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <motion.p>©CashCraft 2025. All rights reserved. Designed by El Sewedy Students</motion.p>
+            <motion.p>{t.allRightsReserved}</motion.p>
           </motion.div>
         </div>
       </motion.footer>

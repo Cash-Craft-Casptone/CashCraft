@@ -9,17 +9,56 @@ import Link from "next/link"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { Navbar } from "@/components/Navbar"
+import { apiGetArticles } from "@/lib/api"
 
 export default function ArticlesPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [bookmarkedArticles, setBookmarkedArticles] = useState<string[]>([])
+  const [readArticles, setReadArticles] = useState<string[]>([])
+  const [articles, setArticles] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const { language, isDark } = useApp()
   const t = translations[language]
 
   useEffect(() => {
     const savedBookmarks = JSON.parse(localStorage.getItem("bookmarkedArticles") || "[]")
     setBookmarkedArticles(savedBookmarks)
+    
+    const savedRead = JSON.parse(localStorage.getItem("readArticles") || "[]")
+    setReadArticles(savedRead)
+    
+    loadArticles()
+  }, [])
+
+  const loadArticles = async () => {
+    try {
+      setLoading(true)
+      const data = await apiGetArticles()
+      setArticles(data)
+    } catch (error) {
+      console.error("Failed to load articles:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Reload read articles when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const savedRead = JSON.parse(localStorage.getItem("readArticles") || "[]")
+        setReadArticles(savedRead)
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("focus", handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("focus", handleVisibilityChange)
+    }
   }, [])
 
   const categories = [
@@ -31,48 +70,6 @@ export default function ArticlesPage() {
     { id: "taxes", name: language === "ar" ? "الضرائب" : "Taxes" },
   ]
 
-  const articles = [
-    {
-      id: "1",
-      title: language === "ar" ? "كيفية إنشاء صندوق الطوارئ" : "How to Build an Emergency Fund",
-      excerpt:
-        language === "ar"
-          ? "تعلم كيفية إنشاء صندوق طوارئ قوي لحماية مستقبلك المالي"
-          : "Learn how to build a strong emergency fund to protect your financial future",
-      category: "saving",
-      readTime: "5 min",
-      author: language === "ar" ? "سارة أحمد" : "Sarah Ahmed",
-      image: "/emergency-fund-article.png",
-      date: "2024-01-15",
-    },
-    {
-      id: "2",
-      title: language === "ar" ? "استراتيجيات الميزانية للمبتدئين" : "Budgeting Strategies for Beginners",
-      excerpt:
-        language === "ar"
-          ? "اكتشف أفضل استراتيجيات الميزانية للمبتدئين"
-          : "Discover the best budgeting strategies for beginners",
-      category: "budgeting",
-      readTime: "7 min",
-      author: language === "ar" ? "محمد علي" : "Mohamed Ali",
-      image: "/budgeting-strategies.png",
-      date: "2024-01-12",
-    },
-    {
-      id: "3",
-      title: language === "ar" ? "فهم درجة الائتمان الخاصة بك" : "Understanding Your Credit Score",
-      excerpt:
-        language === "ar"
-          ? "دليل شامل لفهم وتحسين درجة الائتمان الخاصة بك"
-          : "A comprehensive guide to understanding and improving your credit score",
-      category: "credit",
-      readTime: "6 min",
-      author: language === "ar" ? "فاطمة حسن" : "Fatima Hassan",
-      image: "/credit-score-guide.png",
-      date: "2024-01-10",
-    },
-  ]
-
   const toggleBookmark = (articleId: string) => {
     const updatedBookmarks = bookmarkedArticles.includes(articleId)
       ? bookmarkedArticles.filter((id) => id !== articleId)
@@ -82,13 +79,39 @@ export default function ArticlesPage() {
     localStorage.setItem("bookmarkedArticles", JSON.stringify(updatedBookmarks))
   }
 
+  const markAsRead = (articleId: string) => {
+    if (!readArticles.includes(articleId)) {
+      const updatedRead = [...readArticles, articleId]
+      setReadArticles(updatedRead)
+      localStorage.setItem("readArticles", JSON.stringify(updatedRead))
+    }
+  }
+
   const filteredArticles = articles.filter((article) => {
+    const title = language === "ar" ? article.titleAr : article.titleEn
+    const description = language === "ar" ? article.descriptionAr : article.descriptionEn
+    
     const matchesSearch =
-      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || article.category === selectedCategory
+      title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      description?.toLowerCase().includes(searchTerm.toLowerCase())
+    // For now, show all categories since we don't have category field in DB
+    const matchesCategory = selectedCategory === "all"
     return matchesSearch && matchesCategory
   })
+
+  if (loading) {
+    return (
+      <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+        <Navbar />
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <BookOpen className="w-16 h-16 text-teal-600 mx-auto mb-4 animate-pulse" />
+            <p className="text-gray-600 dark:text-gray-300">Loading articles...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
@@ -140,13 +163,19 @@ export default function ArticlesPage() {
 
         {/* Articles Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredArticles.map((article, index) => (
+          {filteredArticles.map((article, index) => {
+            const isRead = readArticles.includes(article.id)
+            
+            return (
             <motion.div
               key={article.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+              className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer ${
+                isRead ? "border-2 border-green-200 dark:border-green-800" : ""
+              }`}
+              onClick={() => markAsRead(article.id)}
             >
               <div className="relative">
                 <img
@@ -155,7 +184,10 @@ export default function ArticlesPage() {
                   className="w-full h-48 object-cover"
                 />
                 <button
-                  onClick={() => toggleBookmark(article.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleBookmark(article.id)
+                  }}
                   className="absolute top-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors"
                 >
                   {bookmarkedArticles.includes(article.id) ? (
@@ -164,38 +196,47 @@ export default function ArticlesPage() {
                     <Bookmark className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                   )}
                 </button>
+                {isRead && (
+                  <div className="absolute top-4 left-4 p-2 bg-green-500 rounded-full">
+                    <BookmarkCheck className="w-5 h-5 text-white" />
+                  </div>
+                )}
               </div>
 
               <div className="p-6">
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                   <span className="px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full text-xs">
-                    {categories.find((c) => c.id === article.category)?.name}
+                    {language === "ar" ? "مقال" : "Article"}
                   </span>
                   <Clock className="w-4 h-4" />
-                  <span>{article.readTime}</span>
+                  <span>5 min</span>
                 </div>
 
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2">
-                  {article.title}
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2 flex items-center gap-2">
+                  {language === "ar" ? article.titleAr : article.titleEn}
+                  {isRead && <BookmarkCheck className="w-5 h-5 text-green-500 flex-shrink-0" />}
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">{article.excerpt}</p>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                  {language === "ar" ? article.descriptionAr : article.descriptionEn}
+                </p>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <User className="w-4 h-4" />
-                    <span>{article.author}</span>
+                    <span>{language === "ar" ? "المؤلف" : "Author"}</span>
                   </div>
 
-                  <Link href={`/articles/${article.id}`}>
+                  <Link href={`/articles/${article.id}`} onClick={(e) => e.stopPropagation()}>
                     <Button size="sm" className="bg-[#6099a5] hover:bg-[#084f5a] text-white">
-                      {t.readMore}
+                      {isRead ? (language === "ar" ? "إعادة القراءة" : "Read Again") : t.readMore}
                     </Button>
                   </Link>
                 </div>
               </div>
             </motion.div>
-          ))}
+            )
+          })}
         </div>
 
         {filteredArticles.length === 0 && (

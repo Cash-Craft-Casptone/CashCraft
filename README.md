@@ -14,6 +14,7 @@
 
 <div align="center">
 
+<<<<<<< HEAD
 ### Our Amazing Team
 
 <table>
@@ -49,10 +50,46 @@
       <br />
       <a href="https://github.com/HabibaAmrhu" title="GitHub Profile">
         <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+=======
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/MostafaMohamed-stu">
+        <img src="https://github.com/MostafaMohamed-stu.png?size=150" width="150px;" alt="Mostafa Mohamed"/>
+        <br />
+        <sub><b>Mostafa Mohamed</b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/MostafaMohamed-stu" title="GitHub Profile">
+        <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github" alt="GitHub"/>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/kyouka0">
+        <img src="https://github.com/kyouka0.png?size=150" width="150px;" alt="kyouka0"/>
+        <br />
+        <sub><b>kyouka0</b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/kyouka0" title="GitHub Profile">
+        <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github" alt="GitHub"/>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/HabibaAmrhu">
+        <img src="https://github.com/HabibaAmrhu.png?size=150" width="150px;" alt="Habiba Amr"/>
+        <br />
+        <sub><b>Habiba Amr</b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/HabibaAmrhu" title="GitHub Profile">
+        <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github" alt="GitHub"/>
+>>>>>>> b605cd72 (Add PostgreSQL support, deployment guides, and all latest features)
       </a>
     </td>
   </tr>
   <tr>
+<<<<<<< HEAD
     <td align="center" valign="top">
       <a href="https://github.com/ziadelfarhy">
         <img src="https://github.com/ziadelfarhy.png?size=150" width="150px;" style="border-radius: 50%; border: 3px solid #6099a5; padding: 2px;" alt="Ziad El Farhy"/>
@@ -78,6 +115,30 @@
     <td align="center" valign="top">
       <!-- Empty cell for better alignment -->
     </td>
+=======
+    <td align="center">
+      <a href="https://github.com/ziadelfarhy">
+        <img src="https://github.com/ziadelfarhy.png?size=150" width="150px;" alt="Ziad El Farhy"/>
+        <br />
+        <sub><b>Ziad El Farhy</b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/ziadelfarhy" title="GitHub Profile">
+        <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github" alt="GitHub"/>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/DEV-12AM">
+        <img src="https://github.com/DEV-12AM.png?size=150" width="150px;" alt="DEV-12AM"/>
+        <br />
+        <sub><b>DEV-12AM</b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/DEV-12AM" title="GitHub Profile">
+        <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github" alt="GitHub"/>
+      </a>
+    </td>
+>>>>>>> b605cd72 (Add PostgreSQL support, deployment guides, and all latest features)
   </tr>
 </table>
 
@@ -308,6 +369,15 @@ cashcraft-nextjs/
 3. Set budget amount for each category
 4. Categories appear on dashboard with progress indicators
 
+<<<<<<< HEAD
+=======
+## 🎨 Color Scheme
+
+- **Primary Color**: `#6099a5` (Teal)
+- **Accent Colors**: Various category colors
+- **Background**: Light/Dark mode support
+
+>>>>>>> b605cd72 (Add PostgreSQL support, deployment guides, and all latest features)
 ## 📸 Screenshots
 
 *Add screenshots of your application here*
@@ -322,6 +392,13 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+<<<<<<< HEAD
+=======
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+>>>>>>> b605cd72 (Add PostgreSQL support, deployment guides, and all latest features)
 ## 👥 Authors
 
 **Team 14**
@@ -331,9 +408,21 @@ Contributions are welcome! Please follow these steps:
 - [Ziad El Farhy](https://github.com/ziadelfarhy)
 - [DEV-12AM](https://github.com/DEV-12AM)
 
+<<<<<<< HEAD
 ## 📞 Support
 
 For support, email cashcraft@gmail.com or open an issue in the repository.
+=======
+## 🙏 Acknowledgments
+
+- shadcn/ui for the component library
+- Next.js team for the amazing framework
+- All contributors and users
+
+## 📞 Support
+
+For support, email your-email@example.com or open an issue in the repository.
+>>>>>>> b605cd72 (Add PostgreSQL support, deployment guides, and all latest features)
 
 ---
 

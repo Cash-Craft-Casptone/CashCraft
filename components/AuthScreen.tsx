@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
-import { apiLogin, apiRegister } from "@/lib/api"
+import { apiLogin, apiRegister, apiGoogleAuth } from "@/lib/api"
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 
 type AuthMode = "login" | "register"
 
@@ -58,18 +59,26 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
       localStorage.setItem("cashcraft_refreshToken", refreshToken)
       console.log("AuthScreen - Tokens stored, extracting user data from token")
       // Extract user data from the JWT token
+      let userRole = "user"
       try {
         const tokenParts = accessToken.split('.')
         if (tokenParts.length === 3) {
           const tokenData = JSON.parse(atob(tokenParts[1]))
           console.log("AuthScreen - Token data:", tokenData)
+          
+          // Extract role from token
+          userRole = tokenData['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] 
+                  || tokenData['role'] 
+                  || tokenData['Role']
+                  || 'user'
+          
           const userData = {
             id: tokenData.sub || tokenData.userId || Date.now().toString(),
             email: tokenData.email || email,
             username: tokenData.username || tokenData.name || email.split('@')[0],
-            displayName: tokenData.name || tokenData.displayName || email.split('@')[0],
-            role: tokenData.role || "user",
-            isPremium: tokenData.isPremium || false,
+            displayName: tokenData.displayName || tokenData.name || email.split('@')[0],
+            role: userRole,
+            isPremium: tokenData.isPremium === 'true' || tokenData.isPremium === true || false,
             createdAt: tokenData.createdAt || new Date().toISOString()
           }
           setCurrentUser(userData)
@@ -94,7 +103,15 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
         localStorage.setItem("cashcraft_user", JSON.stringify(userData))
         console.log("AuthScreen - Fallback user data set:", userData)
       }
-      router.push("/dashboard")
+      
+      // Redirect based on role
+      if (userRole.toLowerCase() === "admin" || userRole.toLowerCase() === "editor") {
+        console.log("AuthScreen - Admin/Editor detected, redirecting to /admin")
+        router.push("/admin")
+      } else {
+        console.log("AuthScreen - Regular user, redirecting to /dashboard")
+        router.push("/dashboard")
+      }
     } catch (e: any) {
       console.log("AuthScreen - Login error:", e)
       setError(e?.message || "Login failed")
@@ -183,6 +200,66 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
     }
   }
 
+  async function handleGoogleSuccess(credentialResponse: any) {
+    setError(null)
+    setSubmitting(true)
+    try {
+      console.log("AuthScreen - Google login successful, credential received")
+      const { accessToken, refreshToken } = await apiGoogleAuth(credentialResponse.credential)
+      console.log("AuthScreen - Backend authentication successful")
+      
+      localStorage.setItem("cashcraft_accessToken", accessToken)
+      localStorage.setItem("cashcraft_refreshToken", refreshToken)
+      
+      // Extract user data from JWT token
+      try {
+        const tokenParts = accessToken.split('.')
+        if (tokenParts.length === 3) {
+          const tokenData = JSON.parse(atob(tokenParts[1]))
+          console.log("AuthScreen - Token data:", tokenData)
+          
+          const userRole = tokenData['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] 
+                  || tokenData['role'] 
+                  || tokenData['Role']
+                  || 'user'
+          
+          const userData = {
+            id: tokenData.sub || tokenData.userId || Date.now().toString(),
+            email: tokenData.email,
+            username: tokenData.username || tokenData.name || tokenData.email.split('@')[0],
+            displayName: tokenData.displayName || tokenData.name || tokenData.email.split('@')[0],
+            role: userRole,
+            isPremium: tokenData.isPremium === 'true' || tokenData.isPremium === true || false,
+            createdAt: tokenData.createdAt || new Date().toISOString()
+          }
+          setCurrentUser(userData)
+          localStorage.setItem("cashcraft_user", JSON.stringify(userData))
+          console.log("AuthScreen - User data set:", userData)
+          
+          // Redirect based on role
+          if (userRole.toLowerCase() === "admin" || userRole.toLowerCase() === "editor") {
+            router.push("/admin")
+          } else {
+            router.push("/dashboard")
+          }
+        }
+      } catch (tokenError) {
+        console.error("Failed to parse token:", tokenError)
+        setError("Authentication successful but failed to load user data")
+      }
+    } catch (e: any) {
+      console.error("Google auth error:", e)
+      setError(e?.message || "Google authentication failed")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  function handleGoogleError() {
+    console.error("Google login failed")
+    setError("Google authentication failed. Please try again.")
+  }
+
   function handleLogout() {
     localStorage.removeItem("cashcraft_accessToken")
     localStorage.removeItem("cashcraft_refreshToken")
@@ -223,24 +300,24 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
             <div className="bg-white dark:bg-gray-900 p-8">
               <div className="text-center space-y-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#084f5a] dark:text-white mb-2">
-                    Welcome back, {currentUser.displayName}!
+                  <h2 className="text-2xl font-bold text-foreground mb-2">
+                    {t.welcomeBackUser.replace("{name}", currentUser.displayName)}
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    You are logged in as <span className="font-semibold">@{currentUser.username}</span>
+                  <p className="text-muted-foreground">
+                    {t.loggedInAs} <span className="font-semibold">@{currentUser.username}</span>
                   </p>
                 </div>
                 
                 <div className="space-y-4">
                   <div className="text-left space-y-2">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-medium">Email:</span> {currentUser.email}
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium">{t.email}:</span> {currentUser.email}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-medium">Role:</span> {currentUser.role}
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium">{t.role}:</span> {currentUser.role}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-medium">Member since:</span> {new Date(currentUser.createdAt).toLocaleDateString()}
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium">{t.memberSince}:</span> {new Date(currentUser.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -248,16 +325,16 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                 <div className="flex gap-3">
                   <Button 
                     onClick={() => router.push("/dashboard")}
-                    className="flex-1 bg-[#6099a5] hover:bg-[#084f5a] text-white"
+                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
-                    Go to Dashboard
+                    {t.goToDashboard}
                   </Button>
                   <Button 
                     variant="outline"
                     onClick={handleLogout}
-                    className="border-[#6099a5] text-[#6099a5] hover:bg-[#6099a5] hover:text-white"
+                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                   >
-                    Logout
+                    {t.logout}
                   </Button>
                 </div>
               </div>
@@ -269,6 +346,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
   }
 
   return (
+    <GoogleOAuthProvider clientId="299400316195-iejs67lerrrsjv4gplmjhmlf0eaphtp7.apps.googleusercontent.com">
     <div className={`min-h-screen relative ${language === "ar" ? "rtl" : "ltr"}`} suppressHydrationWarning>
       {/* Wallpaper background */}
       <div
@@ -298,12 +376,12 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
           <div className="bg-white dark:bg-gray-900 p-8">
             {/* Toggle */}
             <div className="flex items-center justify-between mb-8">
-              <div className="text-2xl font-bold text-[#084f5a] dark:text-white">
+              <div className="text-2xl font-bold text-foreground">
                 {isLogin ? t.welcomeBack : t.createAccount}
               </div>
               <Button
                 variant="outline"
-                className="border-[#6099a5] text-[#6099a5] hover:bg-[#6099a5] hover:text-white"
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 onClick={() => setMode(isLogin ? "register" : "login")}
               >
                 {isLogin ? t.createNewAccount : t.signInHere}
@@ -333,6 +411,28 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                     <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleLogin} disabled={submitting}>
                       {t.signIn}
                     </Button>
+                    
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">{t.orContinueWith}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-center">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        useOneTap
+                        theme="outline"
+                        size="large"
+                        text="signin_with"
+                        shape="rectangular"
+                      />
+                    </div>
+                    
                     <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                       {t.dontHaveAccount} <button className="text-[#6099a5]" onClick={() => setMode("register")}>{t.createNewAccount}</button>
                     </div>
@@ -347,33 +447,54 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                     className="space-y-5"
                   >
                     <div>
-                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Email</label>
-                      <Input type="email" placeholder="Enter your email" className="bg-white dark:bg-gray-800" value={email} onChange={(e) => setEmail(e.target.value)} />
+                      <label className="block text-sm mb-2 text-foreground">{t.email}</label>
+                      <Input type="email" placeholder={t.enterEmail} className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Username</label>
-                      <Input type="text" placeholder="Enter your username" className="bg-white dark:bg-gray-800" value={username} onChange={(e) => setUsername(e.target.value)} />
+                      <label className="block text-sm mb-2 text-foreground">{t.username}</label>
+                      <Input type="text" placeholder={t.enterUsername} className="bg-background" value={username} onChange={(e) => setUsername(e.target.value)} />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Display Name</label>
-                      <Input type="text" placeholder="Enter your display name" className="bg-white dark:bg-gray-800" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+                      <label className="block text-sm mb-2 text-foreground">{t.displayName}</label>
+                      <Input type="text" placeholder={t.enterDisplayName} className="bg-background" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Phone Number</label>
-                      <Input type="tel" placeholder="Enter your phone number" className="bg-white dark:bg-gray-800" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                      <label className="block text-sm mb-2 text-foreground">{t.phoneNumber}</label>
+                      <Input type="tel" placeholder={t.enterPhoneNumber} className="bg-background" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Password</label>
-                      <Input type="password" placeholder="Enter your password" className="bg-white dark:bg-gray-800" value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <label className="block text-sm mb-2 text-foreground">{t.password}</label>
+                      <Input type="password" placeholder={t.enterPassword} className="bg-background" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
                     <div>
-                      <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">Confirm Password</label>
-                      <Input type="password" placeholder="Confirm your password" className="bg-white dark:bg-gray-800" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                      <label className="block text-sm mb-2 text-foreground">{t.confirmPassword}</label>
+                      <Input type="password" placeholder={t.enterConfirmPassword} className="bg-background" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                     </div>
                     {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
                     <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleRegister} disabled={submitting}>
                       {t.createAccount}
                     </Button>
+                    
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">{t.orContinueWith}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-center">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        theme="outline"
+                        size="large"
+                        text="signup_with"
+                        shape="rectangular"
+                      />
+                    </div>
+                    
                     <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                       {t.alreadyHaveAccount} <button className="text-[#6099a5]" onClick={() => setMode("login")}>{t.signInHere}</button>
                     </div>
@@ -388,6 +509,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
       {/* Where to put the wallpaper */}
       {/* Place your image at: public/auth-wallpaper.jpg (or pass wallpaperUrl prop) */}
     </div>
+    </GoogleOAuthProvider>
   )
 }
 

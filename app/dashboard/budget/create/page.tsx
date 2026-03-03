@@ -1,423 +1,212 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { FormEvent, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, ArrowRight, Check, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Check } from "lucide-react"
 import Link from "next/link"
+import { useToast } from "@/components/ui/use-toast"
+import { apiCreatePlan, getAuthToken } from "@/lib/api"
+import { useApp } from "@/contexts/AppContext"
 
 const translations = {
   en: {
-    createBudget: "Create Budget",
-    step: "Step",
-    of: "of",
-    next: "Next",
-    previous: "Previous",
-    finish: "Create Budget",
-    basicInfo: "Basic Information",
-    budgetCategories: "Budget Categories",
-    reviewConfirm: "Review & Confirm",
+    title: "Create Budget Plan",
+    subtitle: "Set up a new budget plan to track your spending.",
+    backToBudgets: "Back to Budgets",
     budgetName: "Budget Name",
+    budgetNamePlaceholder: "e.g., January 2025 Budget",
     budgetType: "Budget Type",
     monthly: "Monthly",
     yearly: "Yearly",
-    totalIncome: "Total Income",
     currency: "Currency",
-    description: "Description",
-    categories: "Categories",
-    addCategory: "Add Category",
-    categoryName: "Category Name",
-    budgetAmount: "Budget Amount",
-    totalBudgeted: "Total Budgeted",
-    remaining: "Remaining",
-    budgetSummary: "Budget Summary",
-    backToBudgets: "Back to Budgets",
+    totalIncome: "Total Income (optional)",
+    description: "Description (optional)",
+    descriptionPlaceholder: "Short description of this budget...",
+    createButton: "Create Budget",
   },
   ar: {
-    createBudget: "إنشاء ميزانية",
-    step: "خطوة",
-    of: "من",
-    next: "التالي",
-    previous: "السابق",
-    finish: "إنشاء الميزانية",
-    basicInfo: "المعلومات الأساسية",
-    budgetCategories: "فئات الميزانية",
-    reviewConfirm: "مراجعة وتأكيد",
+    title: "إنشاء خطة ميزانية",
+    subtitle: "قم بإعداد خطة ميزانية جديدة لتتبع نفقاتك.",
+    backToBudgets: "العودة للميزانيات",
     budgetName: "اسم الميزانية",
+    budgetNamePlaceholder: "مثال: ميزانية يناير 2025",
     budgetType: "نوع الميزانية",
     monthly: "شهرية",
     yearly: "سنوية",
-    totalIncome: "إجمالي الدخل",
     currency: "العملة",
-    description: "الوصف",
-    categories: "الفئات",
-    addCategory: "إضافة فئة",
-    categoryName: "اسم الفئة",
-    budgetAmount: "مبلغ الميزانية",
-    totalBudgeted: "إجمالي الميزانية",
-    remaining: "المتبقي",
-    budgetSummary: "ملخص الميزانية",
-    backToBudgets: "العودة للميزانيات",
+    totalIncome: "إجمالي الدخل (اختياري)",
+    description: "الوصف (اختياري)",
+    descriptionPlaceholder: "وصف قصير لهذه الميزانية...",
+    createButton: "إنشاء الميزانية",
   },
 }
 
-const defaultCategories = [
-  { name: "groceries", amount: "" },
-  { name: "transportation", amount: "" },
-  { name: "entertainment", amount: "" },
-  { name: "utilities", amount: "" },
-  { name: "healthcare", amount: "" },
-  { name: "education", amount: "" },
-]
-
 export default function CreateBudgetPage() {
-  const [currentLang, setCurrentLang] = useState<"en" | "ar">("en")
-  const [currentStep, setCurrentStep] = useState(1)
-  const [budgetData, setBudgetData] = useState({
-    name: "",
-    type: "monthly",
-    totalIncome: "",
-    currency: "EGP",
-    description: "",
-    categories: defaultCategories,
-  })
+  const router = useRouter()
+  const { language } = useApp()
+  const { toast } = useToast()
 
-  const t = translations[currentLang]
+  const t = translations[language] ?? translations.en
 
-  const handleNext = () => {
-    if (currentStep < 3) {
-      setCurrentStep(currentStep + 1)
+  const [name, setName] = useState("")
+  const [type, setType] = useState<"monthly" | "yearly">("monthly")
+  const [currency, setCurrency] = useState("EGP")
+  const [totalIncome, setTotalIncome] = useState("")
+  const [description, setDescription] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (isSubmitting) return
+
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      toast({
+        title: "Missing budget name",
+        description: "Please enter a name for your budget.",
+        variant: "destructive",
+      })
+      return
     }
-  }
 
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+    const token = getAuthToken()
+    if (!token) {
+      toast({
+        title: "Not logged in",
+        description: "Please sign in again to create a budget.",
+        variant: "destructive",
+      })
+      router.push("/login")
+      return
     }
-  }
 
-  const handleFinish = () => {
-    console.log("[v0] Creating budget:", budgetData)
-    alert("Budget created successfully! (Frontend-only demo)")
-    // In a real app, this would save to backend and redirect
-  }
+    try {
+      setIsSubmitting(true)
+      console.log("[CreateBudget] Calling apiCreatePlan", { trimmedName, type, currency })
 
-  const addCategory = () => {
-    setBudgetData({
-      ...budgetData,
-      categories: [...budgetData.categories, { name: "", amount: "" }],
-    })
-  }
+      await apiCreatePlan(trimmedName, type, currency, token)
 
-  const removeCategory = (index: number) => {
-    const updatedCategories = budgetData.categories.filter((_, i) => i !== index)
-    setBudgetData({ ...budgetData, categories: updatedCategories })
-  }
+      toast({
+        title: "Budget created",
+        description: "Your budget plan was created successfully.",
+      })
 
-  const updateCategory = (index: number, field: string, value: string) => {
-    const updatedCategories = [...budgetData.categories]
-    updatedCategories[index] = { ...updatedCategories[index], [field]: value }
-    setBudgetData({ ...budgetData, categories: updatedCategories })
-  }
-
-  const getTotalBudgeted = () => {
-    return budgetData.categories.reduce((sum, cat) => sum + (Number.parseInt(cat.amount) || 0), 0)
-  }
-
-  const getRemaining = () => {
-    const totalIncome = Number.parseInt(budgetData.totalIncome) || 0
-    return totalIncome - getTotalBudgeted()
+      router.push("/dashboard/budget")
+    } catch (error: any) {
+      console.error("[CreateBudget] Failed", error)
+      toast({
+        title: "Failed to create budget",
+        description: error?.message || "Please check that the backend is running on http://localhost:5005.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
-    <div className={`min-h-screen bg-background ${currentLang === "ar" ? "rtl font-cairo" : "ltr"}`}>
-      {/* Header */}
+    <div className={`min-h-screen bg-background ${language === "ar" ? "rtl font-cairo" : "ltr"}`}>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
         <div className="container flex h-16 items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-3">
             <Link href="/dashboard/budget">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" type="button">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {t.backToBudgets}
               </Button>
             </Link>
-            <h1 className={`text-xl font-bold ${currentLang === "ar" ? "font-cairo" : ""}`}>{t.createBudget}</h1>
+            <div>
+              <h1 className="text-xl font-bold">{t.title}</h1>
+              <p className="text-xs text-muted-foreground">{t.subtitle}</p>
+            </div>
           </div>
-
-          <Button variant="ghost" size="sm" onClick={() => setCurrentLang(currentLang === "en" ? "ar" : "en")}>
-            {currentLang === "en" ? "العربية" : "English"}
-          </Button>
         </div>
       </header>
 
-      {/* Progress Bar */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-muted-foreground">
-            {t.step} {currentStep} {t.of} 3
-          </span>
-          <span className="text-sm text-muted-foreground">{Math.round((currentStep / 3) * 100)}%</span>
-        </div>
-        <Progress value={(currentStep / 3) * 100} className="h-2" />
-      </div>
-
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          {/* Step 1: Basic Information */}
-          {currentStep === 1 && (
-            <Card className="max-w-2xl mx-auto">
-              <CardHeader>
-                <CardTitle>{t.basicInfo}</CardTitle>
-                <CardDescription>Set up the basic details for your budget</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="budgetName">{t.budgetName}</Label>
-                  <Input
-                    id="budgetName"
-                    value={budgetData.name}
-                    onChange={(e) => setBudgetData({ ...budgetData, name: e.target.value })}
-                    placeholder="e.g., January 2025 Budget"
-                  />
-                </div>
+        <Card className="max-w-2xl mx-auto shadow-lg">
+          <CardHeader>
+            <CardTitle>{t.title}</CardTitle>
+            <CardDescription>{t.subtitle}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="budget-name">{t.budgetName}</Label>
+                <Input
+                  id="budget-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t.budgetNamePlaceholder}
+                />
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="budgetType">{t.budgetType}</Label>
-                    <Select
-                      value={budgetData.type}
-                      onValueChange={(value) => setBudgetData({ ...budgetData, type: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="monthly">{t.monthly}</SelectItem>
-                        <SelectItem value="yearly">{t.yearly}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="currency">{t.currency}</Label>
-                    <Select
-                      value={budgetData.currency}
-                      onValueChange={(value) => setBudgetData({ ...budgetData, currency: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="EGP">EGP</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="budget-type">{t.budgetType}</Label>
+                  <Select value={type} onValueChange={(val: "monthly" | "yearly") => setType(val)}>
+                    <SelectTrigger id="budget-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">{t.monthly}</SelectItem>
+                      <SelectItem value="yearly">{t.yearly}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="totalIncome">{t.totalIncome}</Label>
-                  <Input
-                    id="totalIncome"
-                    type="number"
-                    value={budgetData.totalIncome}
-                    onChange={(e) => setBudgetData({ ...budgetData, totalIncome: e.target.value })}
-                    placeholder="5000"
-                  />
+                  <Label htmlFor="currency">{t.currency}</Label>
+                  <Select value={currency} onValueChange={(val) => setCurrency(val)}>
+                    <SelectTrigger id="currency">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EGP">EGP</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">{t.description}</Label>
-                  <Textarea
-                    id="description"
-                    value={budgetData.description}
-                    onChange={(e) => setBudgetData({ ...budgetData, description: e.target.value })}
-                    placeholder="Optional description for your budget..."
-                    rows={3}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
+              <div className="space-y-2">
+                <Label htmlFor="total-income">{t.totalIncome}</Label>
+                <Input
+                  id="total-income"
+                  type="number"
+                  value={totalIncome}
+                  onChange={(e) => setTotalIncome(e.target.value)}
+                  placeholder="5000"
+                />
+              </div>
 
-          {/* Step 2: Budget Categories */}
-          {currentStep === 2 && (
-            <Card className="max-w-4xl mx-auto">
-              <CardHeader>
-                <CardTitle>{t.budgetCategories}</CardTitle>
-                <CardDescription>Allocate your budget across different categories</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {budgetData.categories.map((category, index) => (
-                    <div key={index} className="flex items-end space-x-2">
-                      <div className="flex-1 space-y-2">
-                        <Label>{t.categoryName}</Label>
-                        <Input
-                          value={category.name}
-                          onChange={(e) => updateCategory(index, "name", e.target.value)}
-                          placeholder="Category name"
-                        />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <Label>{t.budgetAmount}</Label>
-                        <Input
-                          type="number"
-                          value={category.amount}
-                          onChange={(e) => updateCategory(index, "amount", e.target.value)}
-                          placeholder="1000"
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeCategory(index)}
-                        className="mb-0"
-                        disabled={budgetData.categories.length <= 1}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">{t.description}</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={t.descriptionPlaceholder}
+                  rows={3}
+                />
+              </div>
 
-                <Button variant="outline" onClick={addCategory} className="w-full bg-transparent">
-                  <Plus className="w-4 h-4 mr-2" />
-                  {t.addCategory}
+              <div className="pt-2 flex justify-end">
+                <Button type="submit" disabled={isSubmitting}>
+                  <Check className="w-4 h-4 mr-2" />
+                  {isSubmitting ? "Creating..." : t.createButton}
                 </Button>
-
-                <div className="bg-muted p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{t.totalBudgeted}:</span>
-                    <span className="font-bold">
-                      {getTotalBudgeted().toLocaleString()} {budgetData.currency}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{t.totalIncome}:</span>
-                    <span className="font-bold">
-                      {Number.parseInt(budgetData.totalIncome || "0").toLocaleString()} {budgetData.currency}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{t.remaining}:</span>
-                    <span className={`font-bold ${getRemaining() < 0 ? "text-red-600" : "text-green-600"}`}>
-                      {getRemaining().toLocaleString()} {budgetData.currency}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Step 3: Review & Confirm */}
-          {currentStep === 3 && (
-            <Card className="max-w-2xl mx-auto">
-              <CardHeader>
-                <CardTitle>{t.reviewConfirm}</CardTitle>
-                <CardDescription>Review your budget details before creating</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm text-muted-foreground">{t.budgetName}</Label>
-                      <p className="font-medium">{budgetData.name}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm text-muted-foreground">{t.budgetType}</Label>
-                      <p className="font-medium capitalize">{budgetData.type}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm text-muted-foreground">{t.totalIncome}</Label>
-                      <p className="font-medium">
-                        {Number.parseInt(budgetData.totalIncome || "0").toLocaleString()} {budgetData.currency}
-                      </p>
-                    </div>
-                    <div>
-                      <Label className="text-sm text-muted-foreground">{t.currency}</Label>
-                      <p className="font-medium">{budgetData.currency}</p>
-                    </div>
-                  </div>
-
-                  {budgetData.description && (
-                    <div>
-                      <Label className="text-sm text-muted-foreground">{t.description}</Label>
-                      <p className="font-medium">{budgetData.description}</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <Label className="text-lg font-semibold">{t.budgetSummary}</Label>
-                  <div className="space-y-2">
-                    {budgetData.categories
-                      .filter((cat) => cat.name && cat.amount)
-                      .map((category, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                          <span className="font-medium capitalize">{category.name}</span>
-                          <span className="font-bold">
-                            {Number.parseInt(category.amount).toLocaleString()} {budgetData.currency}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between items-center text-lg font-bold">
-                      <span>{t.totalBudgeted}</span>
-                      <span>
-                        {getTotalBudgeted().toLocaleString()} {budgetData.currency}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm text-muted-foreground mt-1">
-                      <span>{t.remaining}</span>
-                      <span className={getRemaining() < 0 ? "text-red-600" : "text-green-600"}>
-                        {getRemaining().toLocaleString()} {budgetData.currency}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </motion.div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between items-center mt-8 max-w-4xl mx-auto">
-          <Button variant="outline" onClick={handlePrevious} disabled={currentStep === 1}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t.previous}
-          </Button>
-
-          {currentStep < 3 ? (
-            <Button onClick={handleNext}>
-              {t.next}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          ) : (
-            <Button onClick={handleFinish}>
-              <Check className="w-4 h-4 mr-2" />
-              {t.finish}
-            </Button>
-          )}
-        </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </main>
     </div>
   )

@@ -33,6 +33,7 @@ namespace CashCraft.Api.Controllers
             public string Password { get; set; } = string.Empty;
             public string DisplayName { get; set; } = string.Empty;
             public string PhoneNumber { get; set; } = string.Empty;
+            public string? Role { get; set; } // Optional role parameter
         }
 
         [HttpPost("register")]
@@ -53,7 +54,8 @@ namespace CashCraft.Api.Controllers
                     Username = req.Username,
                     DisplayName = req.DisplayName,
                     PhoneNumber = req.PhoneNumber,
-                    PasswordHash = HashPassword(req.Password)
+                    PasswordHash = HashPassword(req.Password),
+                    Role = req.Role ?? "User" // Use provided role or default to "User"
                 };
                 _db.Users.Add(user);
                 await _db.SaveChangesAsync();
@@ -135,6 +137,58 @@ namespace CashCraft.Api.Controllers
                 await _db.SaveChangesAsync();
             }
             return Ok();
+        }
+
+        public class GoogleAuthRequest
+        {
+            public string IdToken { get; set; } = string.Empty;
+        }
+
+        [HttpPost("google")]
+        public async Task<IActionResult> GoogleAuth([FromBody] GoogleAuthRequest req)
+        {
+            try
+            {
+                // Decode the Google ID token (in production, verify signature with Google's public keys)
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(req.IdToken);
+                
+                var email = token.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+                var name = token.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+                var googleId = token.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                
+                if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(googleId))
+                {
+                    return BadRequest("Invalid Google token");
+                }
+                
+                // Check if user exists
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+                
+                if (user == null)
+                {
+                    // Create new user from Google account
+                    user = new User
+                    {
+                        Id = Guid.NewGuid(),
+                        Email = email,
+                        Username = email.Split('@')[0] + "_" + Guid.NewGuid().ToString().Substring(0, 8),
+                        DisplayName = name ?? email.Split('@')[0],
+                        PhoneNumber = "",
+                        PasswordHash = HashPassword(Guid.NewGuid().ToString()), // Random password for Google users
+                        Role = "User"
+                    };
+                    _db.Users.Add(user);
+                    await _db.SaveChangesAsync();
+                }
+                
+                var tokens = GenerateSimpleTokens(user);
+                return Ok(tokens);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Google authentication failed", error = ex.Message });
+            }
         }
 
         private Task<object> IssueTokens(User user, string? ip, string? replacedTokenHash = null)
@@ -227,7 +281,10 @@ namespace CashCraft.Api.Controllers
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role)
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("displayName", user.DisplayName),
+                    new Claim("username", user.Username),
+                    new Claim("isPremium", user.IsPremium.ToString())
                 },
                 expires: DateTime.UtcNow.AddDays(7), // Extended to 7 days for development
                 signingCredentials: creds

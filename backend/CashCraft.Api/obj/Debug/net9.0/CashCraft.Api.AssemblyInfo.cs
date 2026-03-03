@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CashCraft.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c77620e1d21902736407c547f56d3bccd630d47f")]
 [assembly: System.Reflection.AssemblyProductAttribute("CashCraft.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CashCraft.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

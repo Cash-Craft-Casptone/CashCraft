@@ -72,6 +72,38 @@ namespace CashCraft.Api.Controllers
             await _db.SaveChangesAsync();
             return Created($"api/articles/{entity.Id}", entity);
         }
+
+        [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin,Editor")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] CreateArticleRequest req)
+        {
+            var entity = await _db.Articles.FindAsync(id);
+            if (entity == null) return NotFound();
+
+            entity.Slug = req.Slug;
+            entity.TitleEn = req.TitleEn;
+            entity.TitleAr = req.TitleAr;
+            entity.DescriptionEn = req.DescriptionEn;
+            entity.DescriptionAr = req.DescriptionAr;
+            entity.CoverUrl = req.CoverUrl;
+            entity.BodyEn = req.BodyEn;
+            entity.BodyAr = req.BodyAr;
+
+            await _db.SaveChangesAsync();
+            return Ok(entity);
+        }
+
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin,Editor")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var entity = await _db.Articles.FindAsync(id);
+            if (entity == null) return NotFound();
+
+            _db.Articles.Remove(entity);
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
 

@@ -72,11 +72,24 @@ builder.Services.AddCors(options =>
     });
 });
 
-// DbContext
+// DbContext - Support both SQL Server and PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("Default") ??
                        "Server=(localdb)\\MSSQLLocalDB;Database=CashCraft;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+// Detect database provider from connection string
+var usePostgres = connectionString.Contains("Host=") || connectionString.Contains("host=");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+{
+    if (usePostgres)
+    {
+        options.UseNpgsql(connectionString);
+    }
+    else
+    {
+        options.UseSqlServer(connectionString);
+    }
+});
 
 var app = builder.Build();
 
@@ -102,7 +115,15 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    // Create admin user
+    await CashCraft.Api.AddAdminUser.CreateAdminAccount(context);
+    
+    // Add test budget data
     await CashCraft.Api.AddTestData.AddTestBudgetData(context);
+    
+    // Add sample educational content (articles, videos, quizzes)
+    await CashCraft.Api.AddSampleContent.AddSampleEducationalContent(context);
 }
 
 app.Run();

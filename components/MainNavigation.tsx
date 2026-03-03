@@ -56,11 +56,11 @@ export function MainNavigation() {
           <motion.div
             className={`text-2xl font-bold ${
               isDark ? "text-white" : isScrolled ? "text-white" : "text-black"
-            } ${language === "ar" ? "font-cairo" : ""}`}
+            } ${language === "ar" ? "font-tajawal text-3xl" : ""}`}
             whileHover={{ scale: 1.05 }}
             onClick={() => router.push("/")}
           >
-              CashCraft
+              {language === 'ar' ? 'كاش كرافت' : 'CashCraft'}
             </motion.div>
 
           {/* Desktop Navigation */}
