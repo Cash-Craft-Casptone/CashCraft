@@ -6,14 +6,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Force webpack bundler instead of Turbopack
-  webpack: (config) => {
-    return config;
-  },
-  // Force fresh build
-  generateBuildId: async () => {
-    return 'build-' + Date.now()
-  },
+  // Empty turbopack config to silence warning
+  turbopack: {},
 }
 
 export default nextConfig
