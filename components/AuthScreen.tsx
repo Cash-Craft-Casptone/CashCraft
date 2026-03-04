@@ -346,7 +346,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
   }
 
   return (
-    <GoogleOAuthProvider clientId="299400316195-iejs67lerrrsjv4gplmjhmlf0eaphtp7.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
     <div className={`min-h-screen relative ${language === "ar" ? "rtl" : "ltr"}`} suppressHydrationWarning>
       {/* Wallpaper background */}
       <div

@@ -102,7 +102,7 @@ export default function CreateBudgetPage() {
       console.error("[CreateBudget] Failed", error)
       toast({
         title: "Failed to create budget",
-        description: error?.message || "Please check that the backend is running on http://localhost:5005.",
+        description: error?.message || "Please check your connection and try again.",
         variant: "destructive",
       })
     } finally {
