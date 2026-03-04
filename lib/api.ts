@@ -1,5 +1,6 @@
 // API client for CashCraft backend
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://cashcraft.runasp.net/api"
+// Use Next.js API proxy to avoid CORS issues
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/proxy"
 
 interface ApiResponse<T> {
   data?: T
