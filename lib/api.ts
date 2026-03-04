@@ -1,6 +1,6 @@
 // API client for CashCraft backend
 // Direct connection to backend (no proxy needed)
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://cashcraft.runasp.net/api"
+const API_BASE = "https://cashcraft.runasp.net/api"
 
 interface ApiResponse<T> {
   data?: T
