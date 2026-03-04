@@ -96,7 +96,7 @@ export async function apiGetCurrentUser(token?: string) {
     role: string
     isPremium: boolean
     createdAt: string
-  }>("users/me", {
+  }>("Users/me", {
     method: "GET",
     token
   })
@@ -111,7 +111,7 @@ export async function apiLogin(email: string, password: string) {
   const response = await request<{
     accessToken: string
     refreshToken: string
-  }>("auth/login", {
+  }>("Auth/login", {
     method: "POST",
     body: { email, password }
   })
@@ -126,7 +126,7 @@ export async function apiGoogleAuth(idToken: string) {
   const response = await request<{
     accessToken: string
     refreshToken: string
-  }>("auth/google", {
+  }>("Auth/google", {
     method: "POST",
     body: { idToken }
   })
@@ -147,7 +147,7 @@ export async function apiRegister(
   const response = await request<{
     accessToken: string
     refreshToken: string
-  }>("auth/register", {
+  }>("Auth/register", {
     method: "POST",
     body: {
       email,
@@ -168,7 +168,7 @@ export async function apiRefreshToken(refreshToken: string) {
   const response = await request<{
     accessToken: string
     refreshToken: string
-  }>("auth/refresh", {
+  }>("Auth/refresh", {
     method: "POST",
     body: { refreshToken }
   })
@@ -196,7 +196,7 @@ export interface ArticleDto {
 }
 
 export async function apiGetArticles() {
-  return request<ArticleDto[]>("articles", {
+  return request<ArticleDto[]>("Articles", {
     method: "GET",
   })
 }
@@ -214,7 +214,7 @@ export async function apiCreateArticle(
   },
   token?: string
 ) {
-  return request<ArticleDto>("articles", {
+  return request<ArticleDto>("Articles", {
     method: "POST",
     body: data,
     token,
@@ -239,7 +239,7 @@ export interface VideoDto {
 }
 
 export async function apiGetVideos() {
-  return request<VideoDto[]>("videos", {
+  return request<VideoDto[]>("Videos", {
     method: "GET",
   })
 }
@@ -258,7 +258,7 @@ export async function apiCreateVideo(
   },
   token?: string
 ) {
-  return request<VideoDto>("videos", {
+  return request<VideoDto>("Videos", {
     method: "POST",
     body: data,
     token,
@@ -293,7 +293,7 @@ export interface QuizDto {
 }
 
 export async function apiGetQuizzes(token?: string) {
-  return request<QuizDto[]>("quizzes", {
+  return request<QuizDto[]>("Quizzes", {
     method: "GET",
     token,
   })
@@ -316,7 +316,7 @@ export async function apiCreateQuiz(
   },
   token?: string
 ) {
-  return request<QuizDto>("quizzes", {
+  return request<QuizDto>("Quizzes", {
     method: "POST",
     body: data,
     token,
@@ -340,7 +340,7 @@ export async function apiGetPlans(token?: string) {
       budgetedAmount: number
       colorHex: string
     }>
-  }>>("budgets/plans", {
+  }>>("Budgets/plans", {
     method: "GET",
     token
   })
@@ -356,7 +356,7 @@ export async function apiCreatePlan(
   token?: string
 ) {
   console.log("📝 Creating budget plan:", name)
-  const response = await request<{ id: string; name: string; type: string; currency: string; createdAt: string }>("budgets/plans", {
+  const response = await request<{ id: string; name: string; type: string; currency: string; createdAt: string }>("Budgets/plans", {
     method: "POST",
     body: {
       name,
@@ -385,7 +385,7 @@ export async function apiGetPlan(planId: string, token?: string) {
       budgetedAmount: number
       colorHex: string
     }>
-  }>(`budgets/plans/${planId}`, {
+  }>(`Budgets/plans/${planId}`, {
     method: "GET",
     token
   })
@@ -404,7 +404,7 @@ export async function apiGetCategories(planId: string, token?: string) {
     name: string
     budgetedAmount: number
     colorHex: string
-  }>>(`budgets/plans/${planId}/categories`, {
+  }>>(`Budgets/plans/${planId}/categories`, {
     method: "GET",
     token
   })
@@ -421,7 +421,7 @@ export async function apiCreateCategory(
   token?: string
 ) {
   console.log(`📂 Adding category "${name}" to plan ${planId}`)
-  const response = await request<{ id: string; name: string; colorHex: string; budgetedAmount: number; createdAt: string }>(`budgets/plans/${planId}/categories`, {
+  const response = await request<{ id: string; name: string; colorHex: string; budgetedAmount: number; createdAt: string }>(`Budgets/plans/${planId}/categories`, {
     method: "POST",
     body: {
       name,
@@ -444,7 +444,7 @@ export async function apiGetExpenses(categoryId: string, token?: string) {
     amount: number
     description: string
     date: string
-  }>>(`budgets/categories/${categoryId}/expenses`, {
+  }>>(`Budgets/categories/${categoryId}/expenses`, {
     method: "GET",
     token
   })
@@ -462,7 +462,7 @@ export async function apiCreateExpense(
 ) {
   console.log("💰 Creating expense:", description, "for category:", categoryId)
   
-  const response = await request<{ id: string }>(`budgets/categories/${categoryId}/expenses`, {
+  const response = await request<{ id: string }>(`Budgets/categories/${categoryId}/expenses`, {
     method: "POST",
     body: {
       amount,
@@ -481,7 +481,7 @@ export async function apiCreateExpense(
 export async function apiAddTestData() {
   console.log("🧪 Adding test data...")
   
-  const response = await request<{ message: string }>("budgets/add-test-data", {
+  const response = await request<{ message: string }>("Budgets/add-test-data", {
     method: "POST"
   })
   
@@ -498,7 +498,7 @@ export async function apiHealthCheck() {
     message: string
     timestamp: string
     endpoints: string[]
-  }>("budgets/health", {
+  }>("Budgets/health", {
     method: "GET"
   })
   
@@ -550,7 +550,7 @@ export async function apiUpdateArticle(
   },
   token?: string
 ) {
-  return request(`articles/${id}`, {
+  return request(`Articles/${id}`, {
     method: "PUT",
     body: data,
     token,
@@ -558,7 +558,7 @@ export async function apiUpdateArticle(
 }
 
 export async function apiDeleteArticle(id: string, token?: string) {
-  return request(`articles/${id}`, {
+  return request(`Articles/${id}`, {
     method: "DELETE",
     token,
   })
@@ -580,7 +580,7 @@ export async function apiUpdateVideo(
   },
   token?: string
 ) {
-  return request(`videos/${id}`, {
+  return request(`Videos/${id}`, {
     method: "PUT",
     body: data,
     token,
@@ -588,7 +588,7 @@ export async function apiUpdateVideo(
 }
 
 export async function apiDeleteVideo(id: string, token?: string) {
-  return request(`videos/${id}`, {
+  return request(`Videos/${id}`, {
     method: "DELETE",
     token,
   })
@@ -613,7 +613,7 @@ export async function apiUpdateQuiz(
   },
   token?: string
 ) {
-  return request(`quizzes/${id}`, {
+  return request(`Quizzes/${id}`, {
     method: "PUT",
     body: data,
     token,
@@ -621,7 +621,7 @@ export async function apiUpdateQuiz(
 }
 
 export async function apiDeleteQuiz(id: string, token?: string) {
-  return request(`quizzes/${id}`, {
+  return request(`Quizzes/${id}`, {
     method: "DELETE",
     token,
   })
