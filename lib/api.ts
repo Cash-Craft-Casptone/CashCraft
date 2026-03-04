@@ -1,5 +1,5 @@
 // API client for CashCraft backend
-const API_BASE = "http://localhost:5005/api"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://cashcraft.runasp.net/api"
 
 interface ApiResponse<T> {
   data?: T
