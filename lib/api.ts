@@ -1,6 +1,6 @@
 // API client for CashCraft backend
 // Use Next.js API proxy to avoid CORS issues
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/proxy"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/backend"
 
 interface ApiResponse<T> {
   data?: T
@@ -19,7 +19,7 @@ async function request<T>(
 ): Promise<T> {
   const { method = "GET", body, token } = options
   
-  const url = `${API_BASE}/${endpoint}`
+  const url = `${API_BASE}?path=${encodeURIComponent(endpoint)}`
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   }
