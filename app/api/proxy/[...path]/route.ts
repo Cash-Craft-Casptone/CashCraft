@@ -39,6 +39,8 @@ async function proxyRequest(
     const path = pathSegments.join('/')
     const url = `${BACKEND_URL}/${path}`
     
+    console.log(`[Proxy] ${method} ${url}`)
+    
     // Get headers from the original request
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -55,12 +57,11 @@ async function proxyRequest(
     if (method === 'POST' || method === 'PUT') {
       try {
         body = await request.text()
+        console.log(`[Proxy] Request body:`, body)
       } catch (e) {
-        // No body
+        console.log(`[Proxy] No body`)
       }
     }
-
-    console.log(`Proxying ${method} request to: ${url}`)
 
     const response = await fetch(url, {
       method,
@@ -68,7 +69,10 @@ async function proxyRequest(
       body,
     })
 
+    console.log(`[Proxy] Response status: ${response.status}`)
+    
     const data = await response.text()
+    console.log(`[Proxy] Response data:`, data.substring(0, 200))
     
     return new NextResponse(data, {
       status: response.status,
@@ -77,9 +81,14 @@ async function proxyRequest(
       },
     })
   } catch (error: any) {
-    console.error('Proxy error:', error)
+    console.error('[Proxy] Error:', error)
     return NextResponse.json(
-      { error: 'Failed to connect to backend', message: error.message },
+      { 
+        error: 'Proxy failed to connect to backend', 
+        message: error.message,
+        backend: BACKEND_URL,
+        path: pathSegments.join('/')
+      },
       { status: 500 }
     )
   }
