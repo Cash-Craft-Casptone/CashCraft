@@ -2,6 +2,8 @@
 // Direct connection to backend (no proxy needed)
 const API_BASE = "https://cashcraft.runasp.net/api"
 
+console.log("🔧 API_BASE configured as:", API_BASE)
+
 interface ApiResponse<T> {
   data?: T
   error?: string
