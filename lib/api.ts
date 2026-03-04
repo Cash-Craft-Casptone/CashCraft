@@ -1,8 +1,10 @@
 // API client for CashCraft backend
 // Direct connection to backend (no proxy needed)
+// Version: 2.0 - Production ready
 const API_BASE = "https://cashcraft.runasp.net/api"
 
 console.log("🔧 API_BASE configured as:", API_BASE)
+console.log("🚀 CashCraft API Client v2.0")
 
 interface ApiResponse<T> {
   data?: T
