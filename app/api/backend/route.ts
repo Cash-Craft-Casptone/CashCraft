@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = 'https://cashcraft.runasp.net/api'
 
+export const runtime = 'nodejs' // Ensure Node.js runtime
+export const dynamic = 'force-dynamic' // Disable caching
+
 export async function POST(request: NextRequest) {
   return handleRequest(request, 'POST')
 }
@@ -24,12 +27,20 @@ async function handleRequest(request: NextRequest, method: string) {
     const { searchParams } = new URL(request.url)
     const path = searchParams.get('path') || ''
     
+    if (!path) {
+      return NextResponse.json(
+        { error: 'Missing path parameter' },
+        { status: 400 }
+      )
+    }
+    
     const url = `${BACKEND_URL}/${path}`
     
     console.log(`[Backend Proxy] ${method} ${url}`)
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     }
     
     const authHeader = request.headers.get('authorization')
@@ -41,20 +52,26 @@ async function handleRequest(request: NextRequest, method: string) {
     if (method === 'POST' || method === 'PUT') {
       try {
         body = await request.text()
+        console.log(`[Backend Proxy] Body:`, body.substring(0, 200))
       } catch (e) {
-        // No body
+        console.log(`[Backend Proxy] No body`)
       }
     }
 
-    const response = await fetch(url, {
+    const fetchOptions: RequestInit = {
       method,
       headers,
       body,
-    })
+    }
 
-    const data = await response.text()
+    console.log(`[Backend Proxy] Fetching...`)
+    const response = await fetch(url, fetchOptions)
+    console.log(`[Backend Proxy] Response status: ${response.status}`)
+
+    const responseText = await response.text()
+    console.log(`[Backend Proxy] Response:`, responseText.substring(0, 200))
     
-    return new NextResponse(data, {
+    return new NextResponse(responseText, {
       status: response.status,
       headers: {
         'Content-Type': 'application/json',
@@ -62,10 +79,12 @@ async function handleRequest(request: NextRequest, method: string) {
     })
   } catch (error: any) {
     console.error('[Backend Proxy] Error:', error)
+    console.error('[Backend Proxy] Error stack:', error.stack)
     return NextResponse.json(
       { 
         error: 'Backend connection failed', 
         message: error.message,
+        stack: error.stack,
         backend: BACKEND_URL
       },
       { status: 500 }
