@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import nodemailer from "nodemailer"
 
-// In-memory OTP store: email -> { code, expiresAt }
-// In production you'd use Redis, but this works for a single-instance deployment
 const otpStore = new Map<string, { code: string; expiresAt: number }>()
 
 function generateOTP(): string {
@@ -17,21 +15,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 })
     }
 
+    const gmailUser = process.env.GMAIL_USER
+    const gmailPass = process.env.GMAIL_APP_PASSWORD
+
+    if (!gmailUser || !gmailPass) {
+      console.error("Missing Gmail env vars - GMAIL_USER:", !!gmailUser, "GMAIL_APP_PASSWORD:", !!gmailPass)
+      return NextResponse.json({ error: "Email service not configured" }, { status: 500 })
+    }
+
     const code = generateOTP()
-    const expiresAt = Date.now() + 10 * 60 * 1000 // 10 minutes
+    const expiresAt = Date.now() + 10 * 60 * 1000
 
     otpStore.set(email.toLowerCase(), { code, expiresAt })
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
+        user: gmailUser,
+        pass: gmailPass,
       },
     })
 
     await transporter.sendMail({
-      from: `"CashCraft" <${process.env.GMAIL_USER}>`,
+      from: `"CashCraft" <${gmailUser}>`,
       to: email,
       subject: "Your CashCraft Verification Code",
       html: `
@@ -48,10 +56,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error("Send OTP error:", error)
-    return NextResponse.json({ error: "Failed to send email. Please try again." }, { status: 500 })
+    console.error("Send OTP error:", error?.message, error?.code)
+    return NextResponse.json(
+      { error: `Failed to send email: ${error?.message || "Unknown error"}` },
+      { status: 500 }
+    )
   }
 }
 
-// Export the store so verify-otp can access it
 export { otpStore }
