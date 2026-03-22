@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,6 +41,13 @@ const predefinedCategories = [
 export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBudgetLimit = 0, currency = "EGP" }: AddCategoriesModalProps) {
   const { language } = useApp()
   const [categories, setCategories] = useState<Category[]>([])
+
+  // Reset categories every time the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setCategories([])
+    }
+  }, [isOpen])
 
   const t = {
     en: {

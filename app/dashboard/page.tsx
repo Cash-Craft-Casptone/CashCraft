@@ -1983,6 +1983,22 @@ export default function Dashboard() {
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
+
+              {/* Total Amount / Net Salary */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Total Budget (Net Salary) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={newPlan.totalAmount}
+                  onChange={(e) => setNewPlan((prev) => ({ ...prev, totalAmount: e.target.value }))}
+                  placeholder="e.g., 10000"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Category budgets cannot exceed this amount</p>
+              </div>
               
               {/* Currency */}
               <div className="mb-4">
@@ -2034,13 +2050,16 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={() => {
-                    console.log("Create Plan clicked")
-                    handleCreatePlan()
+                    if (newPlan.planType === "ai") {
+                      startAIChat()
+                    } else {
+                      handleCreatePlan()
+                    }
                   }}
-                  disabled={!newPlan.name || isCreatingPlan}
+                  disabled={!newPlan.name || !newPlan.totalAmount || isCreatingPlan}
                   className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-md shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                 >
-                  {isCreatingPlan ? "Creating..." : "Create Plan"}
+                  {isCreatingPlan ? "Creating..." : newPlan.planType === "ai" ? "Start AI Chat" : "Create Plan"}
                 </button>
               </div>
             </div>
@@ -2177,9 +2196,9 @@ export default function Dashboard() {
           isOpen={isAddDetailsOpen}
           onClose={() => setIsAddDetailsOpen(false)}
           onSave={handleAddCategories}
-          planName={newPlan.name || "Your Plan"}
-          totalBudgetLimit={parseFloat(newPlan.totalAmount) || 0}
-          currency={newPlan.currency}
+          planName={activePlan?.name || newPlan.name || "Your Plan"}
+          totalBudgetLimit={incomeData.totalIncome > 0 ? incomeData.totalIncome : (parseFloat(newPlan.totalAmount) || 0)}
+          currency={activePlan?.currency || newPlan.currency}
         />
 
         {/* Confirmation Dialog */}
