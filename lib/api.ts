@@ -537,6 +537,26 @@ export function isAuthenticated(): boolean {
 
 
 
+export async function apiDeletePlan(planId: string, token?: string) {
+  console.log("🗑️ Deleting plan:", planId)
+  const response = await request(`Budgets/plans/${planId}`, {
+    method: "DELETE",
+    token,
+  })
+  console.log("✅ Plan deleted successfully")
+  return response
+}
+
+export async function apiDeleteCategory(categoryId: string, token?: string) {
+  console.log("🗑️ Deleting category:", categoryId)
+  const response = await request(`Budgets/categories/${categoryId}`, {
+    method: "DELETE",
+    token,
+  })
+  console.log("✅ Category deleted successfully")
+  return response
+}
+
 // ===== UPDATE & DELETE FUNCTIONS =====
 
 // Articles

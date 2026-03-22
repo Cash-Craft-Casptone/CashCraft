@@ -39,7 +39,7 @@ import { useRouter } from "next/navigation"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { Navbar } from "@/components/Navbar"
-import { apiGetPlans, apiCreatePlan, apiCreateCategory, apiHealthCheck, getAuthToken } from "@/lib/api"
+import { apiGetPlans, apiCreatePlan, apiCreateCategory, apiHealthCheck, getAuthToken, apiDeletePlan } from "@/lib/api"
 import { AddCategoriesModal } from "@/components/AddCategoriesModal"
 import { ConfirmDialog } from "@/components/ConfirmDialog"
 
@@ -1414,8 +1414,14 @@ export default function Dashboard() {
                   confirmText: language === 'ar' ? 'حذف' : 'Delete',
                   cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
                   isDanger: true,
-                  onConfirm: () => {
-                    // Remove the plan
+                  onConfirm: async () => {
+                    try {
+                      const token = localStorage.getItem('cashcraft_accessToken') || undefined
+                      await apiDeletePlan(activePlan.id, token)
+                    } catch (e) {
+                      console.error("Failed to delete plan from backend:", e)
+                    }
+                    // Remove the plan from local state
                     const updatedPlans = plans.filter(p => p.id !== activePlan.id)
                     setPlans(updatedPlans)
                     
