@@ -39,7 +39,7 @@ import { useRouter } from "next/navigation"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { Navbar } from "@/components/Navbar"
-import { apiGetPlans, apiCreatePlan, apiCreateCategory, apiHealthCheck, getAuthToken, apiDeletePlan } from "@/lib/api"
+import { apiGetPlans, apiCreatePlan, apiCreateCategory, apiHealthCheck, getAuthToken, apiDeletePlan, apiDeleteCategory } from "@/lib/api"
 import { AddCategoriesModal } from "@/components/AddCategoriesModal"
 import { ConfirmDialog } from "@/components/ConfirmDialog"
 
@@ -1899,23 +1899,23 @@ export default function Dashboard() {
                                 confirmText: language === 'ar' ? 'حذف' : 'Remove',
                                 cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
                                 isDanger: true,
-                                onConfirm: () => {
+                                onConfirm: async () => {
                                   console.log("Removing category:", category.id)
-                                  // Remove category from activePlan
-                                  const updatedCategories = activePlan.categories.filter(c => c.id !== category.id)
-                                  const updatedPlan = { ...activePlan, categories: updatedCategories }
-                                  setActivePlan(updatedPlan)
-                                  
-                                  // Update plans array
-                                  const updatedPlans = plans.map(p => 
-                                    p.id === activePlan.id ? updatedPlan : p
-                                  )
-                                  setPlans(updatedPlans)
-                                  
-                                  // Save to localStorage
-                                  localStorage.setItem('cashcraft_plans', JSON.stringify(updatedPlans))
-                                  
-                                  console.log(`✅ Category "${translatedName}" removed successfully`)
+                                  try {
+                                    const token = localStorage.getItem('cashcraft_accessToken') || undefined
+                                    await apiDeleteCategory(category.id, token)
+                                    console.log(`✅ Category "${translatedName}" deleted from backend`)
+                                    // Only remove from UI if backend succeeded
+                                    const updatedCategories = activePlan.categories.filter(c => c.id !== category.id)
+                                    const updatedPlan = { ...activePlan, categories: updatedCategories }
+                                    setActivePlan(updatedPlan)
+                                    const updatedPlans = plans.map(p => p.id === activePlan.id ? updatedPlan : p)
+                                    setPlans(updatedPlans)
+                                    localStorage.setItem('cashcraft_plans', JSON.stringify(updatedPlans))
+                                  } catch (e: any) {
+                                    console.error("❌ Delete category not supported by backend:", e?.message)
+                                    alert("Delete category is not supported yet by the backend. Please ask the backend team to add DELETE /api/Budgets/categories/{id} endpoint.")
+                                  }
                                 }
                               })
                             }}
