@@ -39,6 +39,12 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // OTP verification state
+  const [otpStep, setOtpStep] = useState<"form" | "verify">("form")
+  const [otpCode, setOtpCode] = useState("")
+  const [otpSending, setOtpSending] = useState(false)
+  const [otpCooldown, setOtpCooldown] = useState(0)
+
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
@@ -47,6 +53,71 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
 
   const loginBg = wallpaperUrl || "/auth-wallpaper.jpg"
   const registerBg = registerWallpaperUrl || wallpaperUrl || "/auth-wallpaper.jpg"
+
+  // Cooldown timer for resend
+  useEffect(() => {
+    if (otpCooldown <= 0) return
+    const t = setTimeout(() => setOtpCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [otpCooldown])
+
+  async function handleSendOTP() {
+    setError(null)
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address first.")
+      return
+    }
+    if (password !== confirmPassword) {
+      setError(t.enterConfirmPassword || "Passwords do not match")
+      return
+    }
+    if (!username.trim() || !displayName.trim()) {
+      setError("Username and display name are required.")
+      return
+    }
+    setOtpSending(true)
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || "Failed to send code")
+      setOtpStep("verify")
+      setOtpCode("")
+      setOtpCooldown(60)
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setOtpSending(false)
+    }
+  }
+
+  async function handleVerifyAndRegister() {
+    setError(null)
+    if (!otpCode || otpCode.length !== 6) {
+      setError("Please enter the 6-digit code.")
+      return
+    }
+    setSubmitting(true)
+    try {
+      // Verify OTP first
+      const verifyRes = await fetch("/api/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code: otpCode }),
+      })
+      const verifyData = await verifyRes.json()
+      if (!verifyRes.ok) throw new Error(verifyData.error || "Invalid code")
+
+      // OTP valid - proceed with registration
+      await handleRegister()
+    } catch (e: any) {
+      setError(e.message)
+      setSubmitting(false)
+    }
+  }
 
   async function handleLogin() {
     setError(null)
@@ -382,7 +453,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
               <Button
                 variant="outline"
                 className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                onClick={() => setMode(isLogin ? "register" : "login")}
+                onClick={() => { setMode(isLogin ? "register" : "login"); setOtpStep("form"); setError(null) }}
               >
                 {isLogin ? t.createNewAccount : t.signInHere}
               </Button>
@@ -446,34 +517,75 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                     exit="exit"
                     className="space-y-5"
                   >
-                    <div>
-                      <label className="block text-sm mb-2 text-foreground">{t.email}</label>
-                      <Input type="email" placeholder={t.enterEmail} className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-2 text-foreground">{t.username}</label>
-                      <Input type="text" placeholder={t.enterUsername} className="bg-background" value={username} onChange={(e) => setUsername(e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-2 text-foreground">{t.displayName}</label>
-                      <Input type="text" placeholder={t.enterDisplayName} className="bg-background" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-2 text-foreground">{t.phoneNumber}</label>
-                      <Input type="tel" placeholder={t.enterPhoneNumber} className="bg-background" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-2 text-foreground">{t.password}</label>
-                      <Input type="password" placeholder={t.enterPassword} className="bg-background" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    </div>
-                    <div>
-                      <label className="block text-sm mb-2 text-foreground">{t.confirmPassword}</label>
-                      <Input type="password" placeholder={t.enterConfirmPassword} className="bg-background" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-                    </div>
-                    {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
-                    <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleRegister} disabled={submitting}>
-                      {t.createAccount}
-                    </Button>
+                    {otpStep === "form" ? (
+                      <>
+                        <div>
+                          <label className="block text-sm mb-2 text-foreground">{t.email}</label>
+                          <Input type="email" placeholder={t.enterEmail} className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2 text-foreground">{t.username}</label>
+                          <Input type="text" placeholder={t.enterUsername} className="bg-background" value={username} onChange={(e) => setUsername(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2 text-foreground">{t.displayName}</label>
+                          <Input type="text" placeholder={t.enterDisplayName} className="bg-background" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2 text-foreground">{t.phoneNumber}</label>
+                          <Input type="tel" placeholder={t.enterPhoneNumber} className="bg-background" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2 text-foreground">{t.password}</label>
+                          <Input type="password" placeholder={t.enterPassword} className="bg-background" value={password} onChange={(e) => setPassword(e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2 text-foreground">{t.confirmPassword}</label>
+                          <Input type="password" placeholder={t.enterConfirmPassword} className="bg-background" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                        </div>
+                        {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
+                        <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleSendOTP} disabled={otpSending}>
+                          {otpSending ? "Sending code..." : "Send Verification Code"}
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            A 6-digit verification code was sent to
+                          </p>
+                          <p className="font-semibold text-[#084f5a] dark:text-emerald-400 mt-1">{email}</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2 text-foreground">Verification Code</label>
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={6}
+                            placeholder="Enter 6-digit code"
+                            className="bg-background text-center text-2xl tracking-widest font-bold"
+                            value={otpCode}
+                            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          />
+                        </div>
+                        {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
+                        <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleVerifyAndRegister} disabled={submitting || otpCode.length !== 6}>
+                          {submitting ? "Creating account..." : "Verify & Create Account"}
+                        </Button>
+                        <div className="flex items-center justify-between text-sm">
+                          <button className="text-gray-500 hover:text-gray-700" onClick={() => { setOtpStep("form"); setError(null) }}>
+                            ← Change email
+                          </button>
+                          <button
+                            className={`text-[#6099a5] ${otpCooldown > 0 ? "opacity-50 cursor-not-allowed" : "hover:underline"}`}
+                            onClick={otpCooldown > 0 ? undefined : handleSendOTP}
+                            disabled={otpCooldown > 0 || otpSending}
+                          >
+                            {otpCooldown > 0 ? `Resend in ${otpCooldown}s` : "Resend code"}
+                          </button>
+                        </div>
+                      </>
+                    )}
                     
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
@@ -496,7 +608,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                     </div>
                     
                     <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                      {t.alreadyHaveAccount} <button className="text-[#6099a5]" onClick={() => setMode("login")}>{t.signInHere}</button>
+                      {t.alreadyHaveAccount} <button className="text-[#6099a5]" onClick={() => { setMode("login"); setOtpStep("form"); setError(null) }}>{t.signInHere}</button>
                     </div>
                   </motion.div>
                 )}
