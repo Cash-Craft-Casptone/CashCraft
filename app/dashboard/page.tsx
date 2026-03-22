@@ -283,6 +283,14 @@ export default function Dashboard() {
     message: "",
     onConfirm: () => {},
   })
+
+  // Edit category state
+  const [editCategoryDialog, setEditCategoryDialog] = useState<{
+    isOpen: boolean
+    categoryId: string
+    name: string
+    budgetAmount: string
+  }>({ isOpen: false, categoryId: "", name: "", budgetAmount: "" })
   
   const router = useRouter()
   const { language, isDark, refreshUser, currentUser } = useApp()
@@ -858,7 +866,7 @@ export default function Dashboard() {
           const newlyCreated = transformedPlans[transformedPlans.length - 1]
           if (newlyCreated && newPlan.totalAmount) {
             const amount = parseFloat(newPlan.totalAmount) || 0
-            localStorage.setItem(`cashcraft_income_${newlyCreated.id}`, JSON.stringify({ totalIncome: amount, netSalary: amount }))
+            localStorage.setItem(`cashcraft_income_${newlyCreated.id}`, JSON.stringify({ totalIncome: amount, netSalary: 0 }))
           }
           setActivePlan(transformedPlans[transformedPlans.length - 1])
         }
@@ -946,6 +954,42 @@ export default function Dashboard() {
       
     } catch (error: any) {
       console.error("❌ Failed to add categories:", error)
+    }
+  }
+
+  const handleEditCategory = async () => {
+    if (!activePlan || !editCategoryDialog.categoryId) return
+    const token = localStorage.getItem('cashcraft_accessToken') || undefined
+    const newName = editCategoryDialog.name.trim()
+    const newBudget = parseFloat(editCategoryDialog.budgetAmount) || 0
+    if (!newName || newBudget <= 0) {
+      alert("Please enter a valid name and budget amount.")
+      return
+    }
+    // Check duplicate name (excluding the category being edited)
+    const isDuplicate = activePlan.categories.some(
+      c => c.id !== editCategoryDialog.categoryId && c.name.toLowerCase() === newName.toLowerCase()
+    )
+    if (isDuplicate) {
+      alert(`A category named "${newName}" already exists.`)
+      return
+    }
+    try {
+      await fetch(`https://cashcraft.runasp.net/api/Budgets/categories/${editCategoryDialog.categoryId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ name: newName, budgetedAmount: newBudget }),
+      }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`) })
+      // Update local state
+      const updatedCategories = activePlan.categories.map(c =>
+        c.id === editCategoryDialog.categoryId ? { ...c, name: newName, budgetAmount: newBudget } : c
+      )
+      const updatedPlan = { ...activePlan, categories: updatedCategories, totalBudget: updatedCategories.reduce((s, c) => s + c.budgetAmount, 0) }
+      setActivePlan(updatedPlan)
+      setPlans(plans.map(p => p.id === activePlan.id ? updatedPlan : p))
+      setEditCategoryDialog({ isOpen: false, categoryId: "", name: "", budgetAmount: "" })
+    } catch (e: any) {
+      alert(`Failed to update category: ${e?.message}`)
     }
   }
 
@@ -1883,9 +1927,12 @@ export default function Dashboard() {
                             variant="outline" 
                             className="flex-1"
                             onClick={() => {
-                              console.log("Edit category:", category.name)
-                              // TODO: Implement edit functionality
-                              console.log("Edit functionality coming soon")
+                              setEditCategoryDialog({
+                                isOpen: true,
+                                categoryId: category.id,
+                                name: category.name,
+                                budgetAmount: category.budgetAmount.toString(),
+                              })
                             }}
                           >
                             {language === 'ar' ? 'تعديل' : 'Edit'}
@@ -2201,6 +2248,46 @@ export default function Dashboard() {
           currency={activePlan?.currency || newPlan.currency}
           existingCategoryNames={activePlan?.categories.map(c => c.name) || []}
         />
+
+        {/* Edit Category Dialog */}
+        <Dialog open={editCategoryDialog.isOpen} onOpenChange={(open) => !open && setEditCategoryDialog({ isOpen: false, categoryId: "", name: "", budgetAmount: "" })}>
+          <DialogContent className="sm:max-w-sm dark:bg-gray-800">
+            <DialogHeader>
+              <DialogTitle className="dark:text-gray-100">{language === 'ar' ? 'تعديل الفئة' : 'Edit Category'}</DialogTitle>
+              <DialogDescription className="dark:text-gray-400">
+                {language === 'ar' ? 'تعديل اسم الفئة ومبلغ الميزانية' : 'Update the category name and budget amount'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div>
+                <Label className="dark:text-gray-300">{language === 'ar' ? 'اسم الفئة' : 'Category Name'}</Label>
+                <Input
+                  value={editCategoryDialog.name}
+                  onChange={e => setEditCategoryDialog(d => ({ ...d, name: e.target.value }))}
+                  className="mt-1 dark:bg-gray-700 dark:text-gray-100"
+                />
+              </div>
+              <div>
+                <Label className="dark:text-gray-300">{language === 'ar' ? 'مبلغ الميزانية' : 'Budget Amount'} ({activePlan && currencySymbols[activePlan.currency]})</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editCategoryDialog.budgetAmount}
+                  onChange={e => setEditCategoryDialog(d => ({ ...d, budgetAmount: e.target.value }))}
+                  className="mt-1 dark:bg-gray-700 dark:text-gray-100"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setEditCategoryDialog({ isOpen: false, categoryId: "", name: "", budgetAmount: "" })}>
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                </Button>
+                <Button className="flex-1 bg-[#084f5a] hover:bg-[#063d47] text-white" onClick={handleEditCategory}>
+                  {language === 'ar' ? 'حفظ' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Confirmation Dialog */}
         <ConfirmDialog
