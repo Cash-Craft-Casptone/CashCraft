@@ -963,15 +963,15 @@ export default function Dashboard() {
     const newName = editCategoryDialog.name.trim()
     const newBudget = parseFloat(editCategoryDialog.budgetAmount) || 0
     if (!newName || newBudget <= 0) {
-      alert("Please enter a valid name and budget amount.")
+      alert("Please enter a valid budget amount.")
       return
     }
-    // Check duplicate name (excluding the category being edited)
-    const isDuplicate = activePlan.categories.some(
-      c => c.id !== editCategoryDialog.categoryId && c.name.toLowerCase() === newName.toLowerCase()
-    )
-    if (isDuplicate) {
-      alert(`A category named "${newName}" already exists.`)
+    // Validate against total income limit
+    const otherCatsTotal = activePlan.categories
+      .filter(c => c.id !== editCategoryDialog.categoryId)
+      .reduce((s, c) => s + c.budgetAmount, 0)
+    if (incomeData.totalIncome > 0 && newBudget > incomeData.totalIncome - otherCatsTotal) {
+      alert(`Budget amount exceeds the allowed limit. Max: ${(incomeData.totalIncome - otherCatsTotal).toLocaleString()}`)
       return
     }
     try {
@@ -2255,7 +2255,7 @@ export default function Dashboard() {
             <DialogHeader>
               <DialogTitle className="dark:text-gray-100">{language === 'ar' ? 'تعديل الفئة' : 'Edit Category'}</DialogTitle>
               <DialogDescription className="dark:text-gray-400">
-                {language === 'ar' ? 'تعديل اسم الفئة ومبلغ الميزانية' : 'Update the category name and budget amount'}
+                {language === 'ar' ? 'تعديل مبلغ ميزانية الفئة' : 'Update the budget amount for this category'}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
@@ -2263,8 +2263,8 @@ export default function Dashboard() {
                 <Label className="dark:text-gray-300">{language === 'ar' ? 'اسم الفئة' : 'Category Name'}</Label>
                 <Input
                   value={editCategoryDialog.name}
-                  onChange={e => setEditCategoryDialog(d => ({ ...d, name: e.target.value }))}
-                  className="mt-1 dark:bg-gray-700 dark:text-gray-100"
+                  disabled
+                  className="mt-1 dark:bg-gray-700 dark:text-gray-100 opacity-60 cursor-not-allowed"
                 />
               </div>
               <div>
@@ -2276,12 +2276,41 @@ export default function Dashboard() {
                   onChange={e => setEditCategoryDialog(d => ({ ...d, budgetAmount: e.target.value }))}
                   className="mt-1 dark:bg-gray-700 dark:text-gray-100"
                 />
+                {/* Show remaining budget info */}
+                {(() => {
+                  const otherCatsTotal = activePlan?.categories
+                    .filter(c => c.id !== editCategoryDialog.categoryId)
+                    .reduce((s, c) => s + c.budgetAmount, 0) ?? 0
+                  const limit = incomeData.totalIncome
+                  const maxAllowed = limit > 0 ? limit - otherCatsTotal : null
+                  const entered = parseFloat(editCategoryDialog.budgetAmount) || 0
+                  const wouldExceed = maxAllowed !== null && entered > maxAllowed
+                  if (maxAllowed === null) return null
+                  return (
+                    <p className={`text-xs mt-1 font-medium ${wouldExceed ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
+                      {wouldExceed
+                        ? `⚠️ Exceeds limit! Max allowed: ${maxAllowed.toLocaleString()}`
+                        : `Max allowed: ${maxAllowed.toLocaleString()} (Plan budget: ${limit.toLocaleString()})`}
+                    </p>
+                  )
+                })()}
               </div>
               <div className="flex gap-3 pt-2">
                 <Button variant="outline" className="flex-1" onClick={() => setEditCategoryDialog({ isOpen: false, categoryId: "", name: "", budgetAmount: "" })}>
                   {language === 'ar' ? 'إلغاء' : 'Cancel'}
                 </Button>
-                <Button className="flex-1 bg-[#084f5a] hover:bg-[#063d47] text-white" onClick={handleEditCategory}>
+                <Button
+                  className="flex-1 bg-[#084f5a] hover:bg-[#063d47] text-white disabled:opacity-50"
+                  onClick={handleEditCategory}
+                  disabled={(() => {
+                    const otherCatsTotal = activePlan?.categories
+                      .filter(c => c.id !== editCategoryDialog.categoryId)
+                      .reduce((s, c) => s + c.budgetAmount, 0) ?? 0
+                    const limit = incomeData.totalIncome
+                    const entered = parseFloat(editCategoryDialog.budgetAmount) || 0
+                    return entered <= 0 || (limit > 0 && entered > limit - otherCatsTotal)
+                  })()}
+                >
                   {language === 'ar' ? 'حفظ' : 'Save'}
                 </Button>
               </div>
