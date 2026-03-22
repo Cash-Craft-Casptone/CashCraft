@@ -21,6 +21,8 @@ interface AddCategoriesModalProps {
   onClose: () => void
   onSave: (categories: Category[]) => void
   planName: string
+  totalBudgetLimit?: number
+  currency?: string
 }
 
 const predefinedCategories = [
@@ -36,10 +38,10 @@ const predefinedCategories = [
   { nameEn: "Savings", nameAr: "المدخرات", color: "#22c55e", icon: PiggyBank },
 ]
 
-export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCategoriesModalProps) {
+export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBudgetLimit = 0, currency = "EGP" }: AddCategoriesModalProps) {
   const { language } = useApp()
   const [categories, setCategories] = useState<Category[]>([])
-  
+
   const t = {
     en: {
       title: "Add Budget Categories",
@@ -47,9 +49,9 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
       quickAdd: "Quick Add Categories",
       yourCategories: "Your Categories",
       addCategory: "Add Category",
-      noCategories: "No categories added yet. Click \"Add Category\" to get started!",
+      noCategories: 'No categories added yet. Click "Add Category" to get started!',
       categoryName: "Category name",
-      totalBudget: "Total Budget:",
+      totalBudget: "Total Allocated:",
       cancel: "Cancel",
       save: "Save Categories"
     },
@@ -61,13 +63,16 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
       addCategory: "إضافة فئة",
       noCategories: "لم تتم إضافة أي فئات بعد. انقر على \"إضافة فئة\" للبدء!",
       categoryName: "اسم الفئة",
-      totalBudget: "إجمالي الميزانية:",
+      totalBudget: "إجمالي المخصص:",
       cancel: "إلغاء",
       save: "حفظ الفئات"
     }
   }
-  
+
   const translations = t[language as 'en' | 'ar'] || t.en
+
+  const getTotalBudget = () => categories.reduce((sum, cat) => sum + (cat.budgetAmount || 0), 0)
+  const isOverLimit = totalBudgetLimit > 0 && getTotalBudget() > totalBudgetLimit
 
   const addCategory = () => {
     setCategories([...categories, { name: "", budgetAmount: 0, color: "#14b8a6", icon: ShoppingCart }])
@@ -78,35 +83,27 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
   }
 
   const updateCategory = (index: number, field: keyof Category, value: string | number) => {
-    const updatedCategories = [...categories]
-    updatedCategories[index] = { ...updatedCategories[index], [field]: value }
-    setCategories(updatedCategories)
+    const updated = [...categories]
+    updated[index] = { ...updated[index], [field]: value }
+    setCategories(updated)
   }
 
   const addPredefinedCategory = (predefined: { nameEn: string; nameAr: string; color: string; icon: any }) => {
     const categoryName = language === 'ar' ? predefined.nameAr : predefined.nameEn
-    setCategories([...categories, { 
-      name: categoryName, 
-      budgetAmount: 0, 
-      color: predefined.color,
-      icon: predefined.icon
-    }])
+    setCategories([...categories, { name: categoryName, budgetAmount: 0, color: predefined.color, icon: predefined.icon }])
   }
 
   const handleSave = () => {
     const validCategories = categories.filter(cat => cat.name && cat.budgetAmount > 0)
     if (validCategories.length === 0) {
-      const alertMsg = language === 'ar' 
-        ? "الرجاء إضافة فئة واحدة على الأقل مع مبلغ الميزانية!"
-        : "Please add at least one category with a budget amount!"
-      alert(alertMsg)
+      alert(language === 'ar' ? "الرجاء إضافة فئة واحدة على الأقل مع مبلغ الميزانية!" : "Please add at least one category with a budget amount!")
+      return
+    }
+    if (isOverLimit) {
+      alert(`Total category budgets (${getTotalBudget().toLocaleString()}) exceed your plan budget (${totalBudgetLimit.toLocaleString()}). Please reduce category amounts.`)
       return
     }
     onSave(validCategories)
-  }
-
-  const getTotalBudget = () => {
-    return categories.reduce((sum, cat) => sum + (cat.budgetAmount || 0), 0)
   }
 
   return (
@@ -127,27 +124,24 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl overflow-hidden">
+              {/* Header */}
               <div style={{ backgroundColor: "#14b8a6" }} className="text-white p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-semibold">{translations.title}</h2>
-                    <p className="text-white/90 text-sm mt-1">
-                      {translations.subtitle} "{planName}"
-                    </p>
+                    <p className="text-white/90 text-sm mt-1">{translations.subtitle} "{planName}"</p>
+                    {totalBudgetLimit > 0 && (
+                      <p className="text-white/80 text-sm mt-1">Plan Budget: {totalBudgetLimit.toLocaleString()} {currency}</p>
+                    )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClose}
-                    className="text-white hover:bg-white/20"
-                  >
+                  <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
                     <X className="w-5 h-5" />
                   </Button>
                 </div>
               </div>
 
               <div className="p-6 space-y-6">
-                {/* Quick Add Predefined Categories */}
+                {/* Quick Add */}
                 <div className="space-y-3">
                   <Label className="text-lg font-semibold">{translations.quickAdd}</Label>
                   <div className="flex flex-wrap gap-2">
@@ -166,7 +160,7 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
                   </div>
                 </div>
 
-                {/* Current Categories */}
+                {/* Categories List */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Label className="text-lg font-semibold">{translations.yourCategories}</Label>
@@ -188,23 +182,14 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
                           key={index}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
                           className="flex items-center gap-3 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700"
                         >
-                          {/* Icon with Color Background */}
-                          <div 
+                          <div
                             className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-600 shadow-md flex items-center justify-center"
                             style={{ backgroundColor: `${category.color}30` }}
                           >
-                            {category.icon && (
-                              <category.icon 
-                                className="w-5 h-5 dark:text-white" 
-                                style={{ color: category.color }}
-                              />
-                            )}
+                            {category.icon && <category.icon className="w-5 h-5" style={{ color: category.color }} />}
                           </div>
-
-                          {/* Category Name */}
                           <div className="flex-1">
                             <Input
                               placeholder={translations.categoryName}
@@ -213,8 +198,6 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
                               className="border-0 bg-transparent text-lg font-medium dark:text-white"
                             />
                           </div>
-
-                          {/* Budget Amount */}
                           <div className="w-32">
                             <Input
                               type="number"
@@ -224,13 +207,11 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
                               className="text-right font-semibold dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             />
                           </div>
-
-                          {/* Remove Button */}
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => removeCategory(index)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -242,13 +223,24 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
 
                 {/* Summary */}
                 {categories.length > 0 && (
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg border-2 border-emerald-200 dark:border-emerald-700">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-emerald-900 dark:text-emerald-300">{translations.totalBudget}</span>
-                      <Badge variant="secondary" className="text-lg px-3 py-1 bg-emerald-600 dark:bg-emerald-500 text-white">
-                        {language === 'ar' ? 'ج.م' : '$'}{getTotalBudget().toLocaleString()}
+                  <div className={`p-4 rounded-lg border-2 ${isOverLimit ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-gray-800 dark:text-gray-200">{translations.totalBudget}</span>
+                      <Badge className={`text-lg px-3 py-1 text-white ${isOverLimit ? 'bg-red-500' : 'bg-emerald-600'}`}>
+                        {getTotalBudget().toLocaleString()}
                       </Badge>
                     </div>
+                    {totalBudgetLimit > 0 && (
+                      <div className="flex items-center justify-between text-sm mt-1">
+                        <span className="text-gray-500 dark:text-gray-400">Plan Budget: {totalBudgetLimit.toLocaleString()}</span>
+                        <span className={`font-semibold ${isOverLimit ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                          Remaining: {(totalBudgetLimit - getTotalBudget()).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {isOverLimit && (
+                      <p className="text-red-600 dark:text-red-400 text-xs mt-2 font-medium">⚠️ Exceeds plan budget! Please reduce category amounts.</p>
+                    )}
                   </div>
                 )}
 
@@ -257,10 +249,10 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName }: AddCat
                   <Button variant="outline" onClick={onClose} className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
                     {translations.cancel}
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleSave}
-                    disabled={categories.length === 0}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 dark:from-emerald-400 dark:to-teal-500"
+                    disabled={categories.length === 0 || isOverLimit}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
                   >
                     {translations.save}
                   </Button>

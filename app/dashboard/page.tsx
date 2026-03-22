@@ -294,6 +294,7 @@ export default function Dashboard() {
     type: "monthly" as "monthly" | "yearly",
     currency: "EGP" as "USD" | "EUR" | "EGP",
     planType: "normal" as "ai" | "normal",
+    totalAmount: "",
     categories: [] as any[],
   })
 
@@ -630,6 +631,7 @@ export default function Dashboard() {
             type: "monthly",
             currency: "EGP",
             planType: "normal",
+            totalAmount: "",
             categories: []
           })
           
@@ -837,6 +839,7 @@ export default function Dashboard() {
         type: "monthly",
         currency: "EGP",
         planType: "normal",
+        totalAmount: "",
         categories: []
       })
       
@@ -846,6 +849,12 @@ export default function Dashboard() {
         if (apiPlans && apiPlans.length > 0) {
           const transformedPlans = transformApiPlans(apiPlans)
           setPlans(transformedPlans)
+          // Save totalAmount for the newly created plan
+          const newlyCreated = transformedPlans[transformedPlans.length - 1]
+          if (newlyCreated && newPlan.totalAmount) {
+            const amount = parseFloat(newPlan.totalAmount) || 0
+            localStorage.setItem(`cashcraft_income_${newlyCreated.id}`, JSON.stringify({ totalIncome: amount, netSalary: amount }))
+          }
           setActivePlan(transformedPlans[transformedPlans.length - 1])
         }
       } catch (reloadError) {
@@ -1169,6 +1178,22 @@ export default function Dashboard() {
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
+
+              {/* Total Amount / Net Salary */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Total Budget (Net Salary) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={newPlan.totalAmount}
+                  onChange={(e) => setNewPlan((prev) => ({ ...prev, totalAmount: e.target.value }))}
+                  placeholder="e.g., 10000"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Category budgets cannot exceed this amount</p>
+              </div>
               
               {/* Currency */}
               <div className="mb-4">
@@ -1228,7 +1253,7 @@ export default function Dashboard() {
                       handleCreatePlan()
                     }
                   }}
-                  disabled={!newPlan.name || isCreatingPlan}
+                  disabled={!newPlan.name || !newPlan.totalAmount || isCreatingPlan}
                   className="px-4 py-2 bg-[#6B9FAD] hover:bg-[#5A8A98] text-white rounded-md shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isCreatingPlan ? "Creating..." : newPlan.planType === "ai" ? "Start AI Chat" : "Create Plan"}
@@ -2101,6 +2126,8 @@ export default function Dashboard() {
           onClose={() => setIsAddDetailsOpen(false)}
           onSave={handleAddCategories}
           planName={newPlan.name || "Your Plan"}
+          totalBudgetLimit={parseFloat(newPlan.totalAmount) || 0}
+          currency={newPlan.currency}
         />
 
         {/* Confirmation Dialog */}
