@@ -1422,12 +1422,7 @@ export default function Dashboard() {
                       console.log("✅ Plan deleted from backend successfully")
                     } catch (e: any) {
                       console.error("❌ Failed to delete plan from backend:", e?.message)
-                      // Show error but still remove from UI
-                      toast({
-                        title: "Warning",
-                        description: `Plan removed locally but backend deletion failed: ${e?.message}`,
-                        variant: "destructive",
-                      })
+                      // Continue anyway - remove from UI
                     }
                     // Remove the plan from local state
                     const updatedPlans = plans.filter(p => p.id !== activePlan.id)

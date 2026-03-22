@@ -539,6 +539,7 @@ export function isAuthenticated(): boolean {
 
 export async function apiDeletePlan(planId: string, token?: string) {
   console.log("🗑️ Deleting plan:", planId)
+  // Try the standard REST endpoint
   const response = await request(`Budgets/plans/${planId}`, {
     method: "DELETE",
     token,
