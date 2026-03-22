@@ -1415,30 +1415,25 @@ export default function Dashboard() {
                   cancelText: language === 'ar' ? 'إلغاء' : 'Cancel',
                   isDanger: true,
                   onConfirm: async () => {
+                    const token = localStorage.getItem('cashcraft_accessToken') || undefined
                     try {
-                      const token = localStorage.getItem('cashcraft_accessToken') || undefined
                       console.log("🗑️ Deleting plan from backend:", activePlan.id)
                       await apiDeletePlan(activePlan.id, token)
                       console.log("✅ Plan deleted from backend successfully")
+                      // Only remove from UI if backend deletion succeeded
+                      const updatedPlans = plans.filter(p => p.id !== activePlan.id)
+                      setPlans(updatedPlans)
+                      if (updatedPlans.length > 0) {
+                        setActivePlan(updatedPlans[0])
+                      } else {
+                        setActivePlan(null)
+                      }
+                      localStorage.setItem('cashcraft_plans', JSON.stringify(updatedPlans))
+                      console.log(`✅ Plan "${activePlan.name}" deleted successfully`)
                     } catch (e: any) {
-                      console.error("❌ Failed to delete plan from backend:", e?.message)
-                      // Continue anyway - remove from UI
+                      console.error("❌ Delete not supported by backend yet:", e?.message)
+                      alert("Delete plan is not supported yet. Please contact the backend team to add DELETE /api/Budgets/plans/{id} endpoint.")
                     }
-                    // Remove the plan from local state
-                    const updatedPlans = plans.filter(p => p.id !== activePlan.id)
-                    setPlans(updatedPlans)
-                    
-                    // Set the next plan as active, or null if no plans left
-                    if (updatedPlans.length > 0) {
-                      setActivePlan(updatedPlans[0])
-                    } else {
-                      setActivePlan(null)
-                    }
-                    
-                    // Save to localStorage
-                    localStorage.setItem('cashcraft_plans', JSON.stringify(updatedPlans))
-                    
-                    console.log(`✅ Plan "${activePlan.name}" deleted successfully`)
                   }
                 })
               }}
