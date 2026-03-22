@@ -23,6 +23,7 @@ interface AddCategoriesModalProps {
   planName: string
   totalBudgetLimit?: number
   currency?: string
+  existingCategoryNames?: string[]
 }
 
 const predefinedCategories = [
@@ -38,7 +39,7 @@ const predefinedCategories = [
   { nameEn: "Savings", nameAr: "المدخرات", color: "#22c55e", icon: PiggyBank },
 ]
 
-export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBudgetLimit = 0, currency = "EGP" }: AddCategoriesModalProps) {
+export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBudgetLimit = 0, currency = "EGP", existingCategoryNames = [] }: AddCategoriesModalProps) {
   const { language } = useApp()
   const [categories, setCategories] = useState<Category[]>([])
 
@@ -48,6 +49,12 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
       setCategories([])
     }
   }, [isOpen])
+
+  // All names already taken (existing in plan + already added in this session)
+  const takenNames = [
+    ...existingCategoryNames.map(n => n.toLowerCase()),
+    ...categories.map(c => c.name.toLowerCase()),
+  ]
 
   const t = {
     en: {
@@ -97,6 +104,10 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
 
   const addPredefinedCategory = (predefined: { nameEn: string; nameAr: string; color: string; icon: any }) => {
     const categoryName = language === 'ar' ? predefined.nameAr : predefined.nameEn
+    if (takenNames.includes(categoryName.toLowerCase())) {
+      alert(language === 'ar' ? `"${categoryName}" موجودة بالفعل!` : `"${categoryName}" already exists!`)
+      return
+    }
     setCategories([...categories, { name: categoryName, budgetAmount: 0, color: predefined.color, icon: predefined.icon }])
   }
 
@@ -104,6 +115,19 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
     const validCategories = categories.filter(cat => cat.name && cat.budgetAmount > 0)
     if (validCategories.length === 0) {
       alert(language === 'ar' ? "الرجاء إضافة فئة واحدة على الأقل مع مبلغ الميزانية!" : "Please add at least one category with a budget amount!")
+      return
+    }
+    // Check for duplicates within the current session
+    const names = validCategories.map(c => c.name.toLowerCase())
+    const hasDuplicates = names.some((n, i) => names.indexOf(n) !== i)
+    if (hasDuplicates) {
+      alert(language === 'ar' ? "لا يمكن إضافة فئتين بنفس الاسم!" : "You cannot add two categories with the same name!")
+      return
+    }
+    // Check against existing plan categories
+    const conflictsWithExisting = validCategories.find(c => existingCategoryNames.map(n => n.toLowerCase()).includes(c.name.toLowerCase()))
+    if (conflictsWithExisting) {
+      alert(language === 'ar' ? `"${conflictsWithExisting.name}" موجودة بالفعل في الخطة!` : `"${conflictsWithExisting.name}" already exists in this plan!`)
       return
     }
     if (isOverLimit) {
@@ -152,18 +176,23 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                 <div className="space-y-3">
                   <Label className="text-lg font-semibold">{translations.quickAdd}</Label>
                   <div className="flex flex-wrap gap-2">
-                    {predefinedCategories.map((predefined, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addPredefinedCategory(predefined)}
-                        className="flex items-center gap-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-emerald-950"
-                      >
-                        <predefined.icon className="w-4 h-4" />
-                        {language === 'ar' ? predefined.nameAr : predefined.nameEn}
-                      </Button>
-                    ))}
+                    {predefinedCategories.map((predefined, index) => {
+                      const name = language === 'ar' ? predefined.nameAr : predefined.nameEn
+                      const alreadyAdded = takenNames.includes(name.toLowerCase())
+                      return (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addPredefinedCategory(predefined)}
+                          disabled={alreadyAdded}
+                          className={`flex items-center gap-2 ${alreadyAdded ? 'opacity-40 cursor-not-allowed' : 'border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-emerald-950'}`}
+                        >
+                          <predefined.icon className="w-4 h-4" />
+                          {name}
+                        </Button>
+                      )
+                    })}
                   </div>
                 </div>
 

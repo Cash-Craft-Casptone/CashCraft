@@ -2199,6 +2199,7 @@ export default function Dashboard() {
           planName={activePlan?.name || newPlan.name || "Your Plan"}
           totalBudgetLimit={incomeData.totalIncome > 0 ? incomeData.totalIncome : (parseFloat(newPlan.totalAmount) || 0)}
           currency={activePlan?.currency || newPlan.currency}
+          existingCategoryNames={activePlan?.categories.map(c => c.name) || []}
         />
 
         {/* Confirmation Dialog */}
