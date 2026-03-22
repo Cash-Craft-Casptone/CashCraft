@@ -1417,9 +1417,17 @@ export default function Dashboard() {
                   onConfirm: async () => {
                     try {
                       const token = localStorage.getItem('cashcraft_accessToken') || undefined
+                      console.log("🗑️ Deleting plan from backend:", activePlan.id)
                       await apiDeletePlan(activePlan.id, token)
-                    } catch (e) {
-                      console.error("Failed to delete plan from backend:", e)
+                      console.log("✅ Plan deleted from backend successfully")
+                    } catch (e: any) {
+                      console.error("❌ Failed to delete plan from backend:", e?.message)
+                      // Show error but still remove from UI
+                      toast({
+                        title: "Warning",
+                        description: `Plan removed locally but backend deletion failed: ${e?.message}`,
+                        variant: "destructive",
+                      })
                     }
                     // Remove the plan from local state
                     const updatedPlans = plans.filter(p => p.id !== activePlan.id)
