@@ -947,10 +947,27 @@ export default function Dashboard() {
   const handleAddExpense = async () => {
     if (!newExpense.categoryId || !newExpense.amount || !activePlan) return
 
+    const expenseAmount = Number.parseFloat(newExpense.amount)
+
+    // Validate: total expenses cannot exceed plan total budget
+    const currentTotalSpent = activePlan.categories.reduce((sum, cat) => sum + cat.spentAmount, 0)
+    const planBudget = incomeData.totalIncome // totalIncome = net salary = plan budget
+    if (planBudget > 0 && currentTotalSpent + expenseAmount > planBudget) {
+      alert(`Cannot add this expense. Total expenses (${(currentTotalSpent + expenseAmount).toLocaleString()}) would exceed your plan budget (${planBudget.toLocaleString()}).`)
+      return
+    }
+
+    // Also validate: expense cannot exceed the category's budget
+    const category = activePlan.categories.find(cat => cat.id === newExpense.categoryId)
+    if (category && category.spentAmount + expenseAmount > category.budgetAmount) {
+      alert(`This expense exceeds the "${category.name}" category budget. Remaining: ${(category.budgetAmount - category.spentAmount).toLocaleString()}`)
+      return
+    }
+
     const expense: DailyExpense = {
       id: Date.now().toString(),
       categoryId: newExpense.categoryId,
-      amount: Number.parseFloat(newExpense.amount),
+      amount: expenseAmount,
       description: newExpense.description,
       date: new Date(newExpense.date),
       planId: activePlan.id,
@@ -2086,6 +2103,33 @@ export default function Dashboard() {
                   className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 h-12"
                 />
               </div>
+
+              {/* Budget remaining info */}
+              {incomeData.totalIncome > 0 && (() => {
+                const totalSpent = activePlan.categories.reduce((sum, cat) => sum + cat.spentAmount, 0)
+                const remaining = incomeData.totalIncome - totalSpent
+                const newAmount = parseFloat(newExpense.amount) || 0
+                const wouldExceed = newAmount > 0 && totalSpent + newAmount > incomeData.totalIncome
+                return (
+                  <div className={`p-3 rounded-lg text-sm ${wouldExceed ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700' : 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700'}`}>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Plan Budget:</span>
+                      <span className="font-semibold">{currencySymbols[activePlan.currency]}{incomeData.totalIncome.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-gray-600 dark:text-gray-400">Total Spent:</span>
+                      <span className="font-semibold">{currencySymbols[activePlan.currency]}{totalSpent.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between mt-1 border-t pt-1 dark:border-gray-600">
+                      <span className="font-medium">Remaining:</span>
+                      <span className={`font-bold ${wouldExceed ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        {currencySymbols[activePlan.currency]}{remaining.toLocaleString()}
+                      </span>
+                    </div>
+                    {wouldExceed && <p className="text-red-600 dark:text-red-400 text-xs mt-1 font-medium">⚠️ This expense exceeds your remaining budget!</p>}
+                  </div>
+                )
+              })()}
             </div>
 
             <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
@@ -2104,9 +2148,9 @@ export default function Dashboard() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAddExpense}
-                disabled={!newExpense.categoryId || !newExpense.amount}
+                disabled={!newExpense.categoryId || !newExpense.amount || (incomeData.totalIncome > 0 && activePlan.categories.reduce((s, c) => s + c.spentAmount, 0) + (parseFloat(newExpense.amount) || 0) > incomeData.totalIncome)}
                 className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center gap-3 shadow-lg ${
-                  !newExpense.categoryId || !newExpense.amount
+                  !newExpense.categoryId || !newExpense.amount || (incomeData.totalIncome > 0 && activePlan.categories.reduce((s, c) => s + c.spentAmount, 0) + (parseFloat(newExpense.amount) || 0) > incomeData.totalIncome)
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-xl'
                 }`}
