@@ -261,6 +261,9 @@ export default function Dashboard() {
   const [activePlan, setActivePlan] = useState<BudgetPlan | null>(null)
   const [expenses, setExpenses] = useState<DailyExpense[]>([])
   const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false)
+  const [isIncomeOpen, setIsIncomeOpen] = useState(false)
+  const [incomeData, setIncomeData] = useState<{ totalIncome: number; netSalary: number }>({ totalIncome: 0, netSalary: 0 })
+  const [incomeForm, setIncomeForm] = useState({ totalIncome: "", netSalary: "" })
   
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>("")
@@ -438,7 +441,17 @@ export default function Dashboard() {
     }
   }, [])
 
-  // State for the new flow
+  // Load income data when active plan changes
+  useEffect(() => {
+    if (activePlan) {
+      const saved = localStorage.getItem(`cashcraft_income_${activePlan.id}`)
+      if (saved) {
+        setIncomeData(JSON.parse(saved))
+      } else {
+        setIncomeData({ totalIncome: 0, netSalary: 0 })
+      }
+    }
+  }, [activePlan?.id])
   const [isAddDetailsOpen, setIsAddDetailsOpen] = useState(false)
   const [isCreatingPlan, setIsCreatingPlan] = useState(false)
   const [isAIChatOpen, setIsAIChatOpen] = useState(false)
@@ -1450,64 +1463,180 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          {[
-            {
-              title: t.totalBalance,
-              value: `${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget)}`,
-              icon: Target,
-              color: "bg-blue-500",
-              change: "+12%",
-            },
-            {
-              title: t.monthlyExpenses,
-              value: `${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalSpent)}`,
-              icon: TrendingDown,
-              color: "bg-red-500",
-              change: "+8%",
-            },
-            {
-              title: t.remaining,
-              value: `${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget - activePlan.totalSpent)}`,
-              icon: DollarSign,
-              color: "bg-green-500",
-              change: "-4%",
-            },
-            {
-              title: t.budgetUsed,
-              value: `${Math.round((activePlan.totalSpent / activePlan.totalBudget) * 100)}%`,
-              icon: PieChart,
-              color: "bg-purple-500",
-              change: "+15%",
-            },
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+          {/* Income Card - clickable to set income */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
+            <Card
+              className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer"
+              onClick={() => {
+                setIncomeForm({ totalIncome: incomeData.totalIncome.toString(), netSalary: incomeData.netSalary.toString() })
+                setIsIncomeOpen(true)
+              }}
             >
-              <Card className="hover:shadow-lg dark:hover:shadow-xl dark:shadow-emerald-900/20 transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{stat.title}</p>
-                      <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">{stat.value}</p>
-                    </div>
-                    <div className={`p-3 rounded-full ${stat.color}`}>
-                      <stat.icon className="w-6 h-6 text-white" />
-                    </div>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'إجمالي الدخل' : 'Total Income'}</p>
+                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">
+                      {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.totalIncome)}` : <span className="text-sm text-gray-400">Click to set</span>}
+                    </p>
                   </div>
-                  <div className="flex items-center mt-4">
-                    <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
-                      {stat.change} {t.fromLastMonth}
-                    </Badge>
+                  <div className="p-3 rounded-full bg-emerald-500">
+                    <DollarSign className="w-6 h-6 text-white" />
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                </div>
+                <div className="mt-4 text-xs text-gray-400">{language === 'ar' ? 'انقر للتعديل' : 'Click to edit'}</div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Net Salary Card */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card
+              className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer"
+              onClick={() => {
+                setIncomeForm({ totalIncome: incomeData.totalIncome.toString(), netSalary: incomeData.netSalary.toString() })
+                setIsIncomeOpen(true)
+              }}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'}</p>
+                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">
+                      {incomeData.netSalary > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.netSalary)}` : <span className="text-sm text-gray-400">Click to set</span>}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-blue-500">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div className="mt-4 text-xs text-gray-400">
+                  {incomeData.totalIncome > 0 && incomeData.netSalary > 0
+                    ? `${Math.round((incomeData.netSalary / incomeData.totalIncome) * 100)}% of total income`
+                    : language === 'ar' ? 'انقر للتعديل' : 'Click to edit'}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Remaining after expenses */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'المتبقي بعد المصروفات' : 'Remaining After Expenses'}</p>
+                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">
+                      {`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget - activePlan.totalSpent)}`}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-green-500">
+                    <PiggyBank className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
+                    {activePlan.totalBudget > 0 ? `${Math.round(((activePlan.totalBudget - activePlan.totalSpent) / activePlan.totalBudget) * 100)}% remaining` : '0% remaining'}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
+
+        {/* Secondary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.monthlyExpenses}</p>
+                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalSpent)}`}</p>
+                  </div>
+                  <div className="p-3 rounded-full bg-red-500">
+                    <TrendingDown className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
+                    {t.budgetUsed}: {activePlan.totalBudget > 0 ? `${Math.round((activePlan.totalSpent / activePlan.totalBudget) * 100)}%` : '0%'}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.totalBalance}</p>
+                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget)}`}</p>
+                  </div>
+                  <div className="p-3 rounded-full bg-purple-500">
+                    <PieChart className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
+                    {activePlan.categories.length} {language === 'ar' ? 'فئة' : 'categories'}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Income Dialog */}
+        <Dialog open={isIncomeOpen} onOpenChange={setIsIncomeOpen}>
+          <DialogContent className="sm:max-w-md dark:bg-gray-800">
+            <DialogHeader>
+              <DialogTitle className="dark:text-gray-100">{language === 'ar' ? 'تعيين الدخل' : 'Set Income'}</DialogTitle>
+              <DialogDescription className="dark:text-gray-400">
+                {language === 'ar' ? 'أدخل إجمالي دخلك وصافي راتبك' : 'Enter your total income and net salary'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div>
+                <Label className="dark:text-gray-300">{language === 'ar' ? 'إجمالي الدخل' : 'Total Income'} ({currencySymbols[activePlan.currency]})</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={incomeForm.totalIncome}
+                  onChange={e => setIncomeForm(f => ({ ...f, totalIncome: e.target.value }))}
+                  className="mt-1 dark:bg-gray-700 dark:text-gray-100"
+                />
+              </div>
+              <div>
+                <Label className="dark:text-gray-300">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'} ({currencySymbols[activePlan.currency]})</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={incomeForm.netSalary}
+                  onChange={e => setIncomeForm(f => ({ ...f, netSalary: e.target.value }))}
+                  className="mt-1 dark:bg-gray-700 dark:text-gray-100"
+                />
+              </div>
+              <Button
+                className="w-full bg-[#084f5a] hover:bg-[#063d47] text-white"
+                onClick={() => {
+                  const data = {
+                    totalIncome: parseFloat(incomeForm.totalIncome) || 0,
+                    netSalary: parseFloat(incomeForm.netSalary) || 0,
+                  }
+                  setIncomeData(data)
+                  localStorage.setItem(`cashcraft_income_${activePlan.id}`, JSON.stringify(data))
+                  setIsIncomeOpen(false)
+                }}
+              >
+                {language === 'ar' ? 'حفظ' : 'Save'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
