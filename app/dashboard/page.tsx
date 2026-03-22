@@ -39,7 +39,7 @@ import { useRouter } from "next/navigation"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { Navbar } from "@/components/Navbar"
-import { apiGetPlans, apiCreatePlan, apiCreateCategory, apiHealthCheck, getAuthToken, apiDeletePlan, apiDeleteCategory } from "@/lib/api"
+import { apiGetPlans, apiCreatePlan, apiCreateCategory, apiHealthCheck, getAuthToken, apiDeletePlan, apiDeleteCategory, apiGetIncome, apiSaveIncome } from "@/lib/api"
 import { AddCategoriesModal } from "@/components/AddCategoriesModal"
 import { ConfirmDialog } from "@/components/ConfirmDialog"
 
@@ -445,12 +445,17 @@ export default function Dashboard() {
   // Load income data when active plan changes
   useEffect(() => {
     if (activePlan) {
-      const saved = localStorage.getItem(`cashcraft_income_${activePlan.id}`)
-      if (saved) {
-        setIncomeData(JSON.parse(saved))
-      } else {
-        setIncomeData({ totalIncome: 0, netSalary: 0 })
-      }
+      const token = localStorage.getItem('cashcraft_accessToken') || undefined
+      // Try backend first, fallback to localStorage
+      apiGetIncome(activePlan.id, token)
+        .then(data => {
+          setIncomeData({ totalIncome: data.totalIncome, netSalary: data.netSalary })
+        })
+        .catch(() => {
+          const saved = localStorage.getItem(`cashcraft_income_${activePlan.id}`)
+          if (saved) setIncomeData(JSON.parse(saved))
+          else setIncomeData({ totalIncome: 0, netSalary: 0 })
+        })
     }
   }, [activePlan?.id])
   const [isAddDetailsOpen, setIsAddDetailsOpen] = useState(false)
@@ -1475,7 +1480,7 @@ export default function Dashboard() {
                       console.log("🗑️ Deleting plan from backend:", activePlan.id)
                       await apiDeletePlan(activePlan.id, token)
                       console.log("✅ Plan deleted from backend successfully")
-                      // Only remove from UI if backend deletion succeeded
+                      // Remove from UI after successful backend delete
                       const updatedPlans = plans.filter(p => p.id !== activePlan.id)
                       setPlans(updatedPlans)
                       if (updatedPlans.length > 0) {
@@ -1671,6 +1676,9 @@ export default function Dashboard() {
                   }
                   setIncomeData(data)
                   localStorage.setItem(`cashcraft_income_${activePlan.id}`, JSON.stringify(data))
+                  // Save to backend
+                  const token = localStorage.getItem('cashcraft_accessToken') || undefined
+                  apiSaveIncome(activePlan.id, data.totalIncome, data.netSalary, token).catch(console.error)
                   setIsIncomeOpen(false)
                 }}
               >
@@ -1913,8 +1921,8 @@ export default function Dashboard() {
                                     setPlans(updatedPlans)
                                     localStorage.setItem('cashcraft_plans', JSON.stringify(updatedPlans))
                                   } catch (e: any) {
-                                    console.error("❌ Delete category not supported by backend:", e?.message)
-                                    alert("Delete category is not supported yet by the backend. Please ask the backend team to add DELETE /api/Budgets/categories/{id} endpoint.")
+                                    console.error("❌ Delete category failed:", e?.message)
+                                    alert(`Failed to delete category: ${e?.message}`)
                                   }
                                 }
                               })

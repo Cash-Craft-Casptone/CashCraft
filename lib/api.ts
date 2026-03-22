@@ -539,7 +539,6 @@ export function isAuthenticated(): boolean {
 
 export async function apiDeletePlan(planId: string, token?: string) {
   console.log("🗑️ Deleting plan:", planId)
-  // Try the standard REST endpoint
   const response = await request(`Budgets/plans/${planId}`, {
     method: "DELETE",
     token,
@@ -556,6 +555,33 @@ export async function apiDeleteCategory(categoryId: string, token?: string) {
   })
   console.log("✅ Category deleted successfully")
   return response
+}
+
+export async function apiDeleteExpense(categoryId: string, expenseId: string, token?: string) {
+  console.log("🗑️ Deleting expense:", expenseId)
+  const response = await request(`Budgets/categories/${categoryId}/expenses/${expenseId}`, {
+    method: "DELETE",
+    token,
+  })
+  console.log("✅ Expense deleted successfully")
+  return response
+}
+
+export async function apiGetIncome(planId: string, token?: string) {
+  console.log("💰 Fetching income for plan:", planId)
+  return request<{ totalIncome: number; netSalary: number }>(`Budgets/plans/${planId}/income`, {
+    method: "GET",
+    token,
+  })
+}
+
+export async function apiSaveIncome(planId: string, totalIncome: number, netSalary: number, token?: string) {
+  console.log("💰 Saving income for plan:", planId)
+  return request(`Budgets/plans/${planId}/income`, {
+    method: "POST",
+    body: { totalIncome, netSalary },
+    token,
+  })
 }
 
 // ===== UPDATE & DELETE FUNCTIONS =====
