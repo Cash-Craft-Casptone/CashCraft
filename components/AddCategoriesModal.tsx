@@ -234,7 +234,7 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                               className="border-0 bg-transparent text-lg font-medium dark:text-white"
                             />
                           </div>
-                          <div className="w-32">
+                          <div className="w-24 sm:w-32">
                             <Input
                               type="number"
                               placeholder="0"

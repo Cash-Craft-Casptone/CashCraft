@@ -136,7 +136,7 @@ export default function QuizPage() {
           transition={{ delay: 0.1 }}
           className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-8 shadow-lg"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div className="text-center">
               <div className="flex justify-center mb-2">
                 <Trophy className="w-8 h-8 text-yellow-500" />
@@ -202,7 +202,7 @@ export default function QuizPage() {
 
               <p className="text-gray-600 dark:text-gray-300 mb-4">{quiz.description}</p>
 
-              <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 text-sm">
                 <div className="text-center">
                   <div className="font-semibold text-gray-900 dark:text-white">{quiz.questions}</div>
                   <div className="text-gray-600 dark:text-gray-300">{t.questions}</div>

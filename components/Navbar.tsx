@@ -92,16 +92,25 @@ export function Navbar() {
           </div>
 
           {/* Controls */}
-          <div className={`flex items-center ${language === "ar" ? "space-x-12" : "space-x-4"}`}>
+          <div className={`flex items-center gap-2 ${language === "ar" ? "flex-row-reverse" : ""}`}>
             {/* Language Toggle */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-              className="bg-[#6B9FAD] text-white border-[#6B9FAD] hover:bg-[#5A8A98] dark:bg-[#6B9FAD] dark:border-[#6B9FAD] dark:hover:bg-[#5A8A98]"
+              className="bg-[#6B9FAD] text-white border-[#6B9FAD] hover:bg-[#5A8A98] dark:bg-[#6B9FAD] dark:border-[#6B9FAD] dark:hover:bg-[#5A8A98] hidden sm:flex"
             >
-              <Globe className="w-4 h-4 mr-2" />
+              <Globe className="w-4 h-4 mr-1" />
               {language === "en" ? "العربية" : "English"}
+            </Button>
+            {/* Language icon-only on mobile */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+              className="bg-[#6B9FAD] text-white border-[#6B9FAD] hover:bg-[#5A8A98] sm:hidden"
+            >
+              <Globe className="w-4 h-4" />
             </Button>
 
             {/* Theme Toggle */}
@@ -116,13 +125,20 @@ export function Navbar() {
 
             {/* User/Login Button */}
             {currentUser ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   onClick={() => router.push("/dashboard")}
-                  className="bg-[#6B9FAD] hover:bg-[#5A8A98] text-white dark:bg-[#6B9FAD] dark:hover:bg-[#5A8A98]"
+                  className="bg-[#6B9FAD] hover:bg-[#5A8A98] text-white dark:bg-[#6B9FAD] dark:hover:bg-[#5A8A98] hidden sm:flex"
                 >
                   <User className="w-4 h-4 mr-2" />
                   {currentUser.displayName}
+                </Button>
+                <Button
+                  onClick={() => router.push("/dashboard")}
+                  className="bg-[#6B9FAD] hover:bg-[#5A8A98] text-white sm:hidden"
+                  size="sm"
+                >
+                  <User className="w-4 h-4" />
                 </Button>
                 <Button
                   variant="outline"
@@ -142,6 +158,7 @@ export function Navbar() {
               <Button
                 onClick={() => router.push("/login")}
                 className="bg-[#6B9FAD] hover:bg-[#5A8A98] text-white dark:bg-[#6B9FAD] dark:hover:bg-[#5A8A98]"
+                size="sm"
               >
                 {t.login}
               </Button>

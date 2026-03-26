@@ -154,7 +154,7 @@ export default function VideosPage() {
                 <img
                   src={video.thumbnail || "/placeholder.svg"}
                   alt={video.title}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-40 sm:h-48 object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Play className="w-12 h-12 text-white" />
@@ -174,7 +174,7 @@ export default function VideosPage() {
                 </button>
               </div>
 
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                   <span className="px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full text-xs">
                     {categories.find((c) => c.id === video.category)?.name}

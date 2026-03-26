@@ -1472,20 +1472,20 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center mb-8"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4"
         >
           <div>
-            <h1 className="text-3xl font-bold text-[#084f5a] dark:text-emerald-400">{t.dashboard}</h1>
-            <p className="text-gray-600 dark:text-gray-300">{t.smartMoneyDesc}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#084f5a] dark:text-emerald-400">{t.dashboard}</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">{t.smartMoneyDesc}</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsAddExpenseOpen(true)}
-              className="px-6 py-3 border-2 border-[#6B9FAD] dark:border-[#6B9FAD] text-[#6B9FAD] dark:text-[#6B9FAD] hover:bg-[#6B9FAD]/10 dark:hover:bg-[#6B9FAD]/20 dark:hover:border-[#5A8A98] rounded-xl font-semibold transition-all duration-200 flex items-center gap-3"
+              className="px-3 sm:px-6 py-2 sm:py-3 border-2 border-[#6B9FAD] dark:border-[#6B9FAD] text-[#6B9FAD] dark:text-[#6B9FAD] hover:bg-[#6B9FAD]/10 dark:hover:bg-[#6B9FAD]/20 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               {t.addExpense}
@@ -1496,9 +1496,9 @@ export default function Dashboard() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
                 onClick={() => setIsAddDetailsOpen(true)}
-              className="px-6 py-3 border-2 border-[#6B9FAD] dark:border-[#6B9FAD] text-[#6B9FAD] dark:text-[#6B9FAD] hover:bg-[#6B9FAD]/10 dark:hover:bg-[#6B9FAD]/20 dark:hover:border-[#5A8A98] rounded-xl font-semibold transition-all duration-200 flex items-center gap-3"
+              className="px-3 sm:px-6 py-2 sm:py-3 border-2 border-[#6B9FAD] dark:border-[#6B9FAD] text-[#6B9FAD] dark:text-[#6B9FAD] hover:bg-[#6B9FAD]/10 dark:hover:bg-[#6B9FAD]/20 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
                 {language === 'ar' ? 'إضافة فئات' : 'Add Categories'}
@@ -1541,7 +1541,7 @@ export default function Dashboard() {
                   }
                 })
               }}
-              className="px-6 py-3 border-2 border-red-500 dark:border-red-400 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:border-red-300 rounded-xl font-semibold transition-all duration-200 flex items-center gap-3"
+              className="px-3 sm:px-6 py-2 sm:py-3 border-2 border-red-500 dark:border-red-400 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 text-sm sm:text-base"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1554,7 +1554,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-4">
           {/* Income Card - clickable to set income */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
             <Card
@@ -1637,7 +1637,7 @@ export default function Dashboard() {
         </div>
 
         {/* Secondary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
@@ -1733,7 +1733,7 @@ export default function Dashboard() {
         </Dialog>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Categories Overview */}
           <div className="lg:col-span-2">
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
@@ -1898,7 +1898,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 {activePlan.categories.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activePlan.categories.map((category) => (
                       <div
                         key={category.id}

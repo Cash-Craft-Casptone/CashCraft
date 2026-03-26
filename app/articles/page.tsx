@@ -181,7 +181,7 @@ export default function ArticlesPage() {
                 <img
                   src={article.image || "/placeholder.svg"}
                   alt={article.title}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-40 sm:h-48 object-cover"
                 />
                 <button
                   onClick={(e) => {
@@ -203,7 +203,7 @@ export default function ArticlesPage() {
                 )}
               </div>
 
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                   <span className="px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full text-xs">
                     {language === "ar" ? "مقال" : "Article"}
