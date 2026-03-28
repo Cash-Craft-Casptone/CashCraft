@@ -1568,7 +1568,7 @@ export default function Dashboard() {
             </Card>
           </motion.div>
 
-          {/* Net Salary Card - auto calculated: totalIncome - totalSpent */}
+          {/* Net Salary Card - totalIncome - totalSpent (what's left of your income after actual spending) */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
@@ -1594,7 +1594,7 @@ export default function Dashboard() {
                       <div className="mt-4 text-xs text-gray-400">
                         {incomeData.totalIncome > 0
                           ? `${language === 'ar' ? 'المصروف:' : 'Spent:'} ${currencySymbols[activePlan.currency]}${formatNumber(totalSpent)}`
-                          : language === 'ar' ? 'الدخل - المصروفات' : 'Income - Expenses'}
+                          : language === 'ar' ? 'الدخل - المصروفات' : 'Income - Spent'}
                       </div>
                     </>
                   )
@@ -1603,32 +1603,32 @@ export default function Dashboard() {
             </Card>
           </motion.div>
 
-          {/* Remaining after expenses = totalIncome - totalSpent */}
+          {/* Remaining after expenses = totalBudget - totalSpent (how much of allocated budget is left) */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 {(() => {
                   const totalSpent = activePlan.categories.reduce((s, c) => s + c.spentAmount, 0)
-                  const remaining = incomeData.totalIncome > 0 ? incomeData.totalIncome - totalSpent : activePlan.totalBudget - totalSpent
-                  const base = incomeData.totalIncome > 0 ? incomeData.totalIncome : activePlan.totalBudget
-                  const pct = base > 0 ? Math.round((remaining / base) * 100) : 0
-                  const isNegative = remaining < 0
+                  const totalBudget = activePlan.categories.reduce((s, c) => s + c.budgetAmount, 0)
+                  const remaining = Math.max(0, totalBudget - totalSpent)
+                  const pct = totalBudget > 0 ? Math.round((remaining / totalBudget) * 100) : 0
+                  const isOverspent = totalSpent > totalBudget
                   return (
                     <>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'المتبقي بعد المصروفات' : 'Remaining After Expenses'}</p>
-                          <p className={`text-2xl font-bold ${isNegative ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
+                          <p className={`text-2xl font-bold ${isOverspent ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
                             {`${currencySymbols[activePlan.currency]}${formatNumber(remaining)}`}
                           </p>
                         </div>
-                        <div className={`p-3 rounded-full ${isNegative ? 'bg-red-500' : 'bg-green-500'}`}>
+                        <div className={`p-3 rounded-full ${isOverspent ? 'bg-red-500' : 'bg-green-500'}`}>
                           <PiggyBank className="w-6 h-6 text-white" />
                         </div>
                       </div>
                       <div className="mt-4">
-                        <Badge variant="secondary" className={`text-xs ${isNegative ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'dark:bg-gray-700 dark:text-gray-300'}`}>
-                          {pct}% {language === 'ar' ? 'متبقي' : 'remaining'}
+                        <Badge variant="secondary" className={`text-xs ${isOverspent ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'dark:bg-gray-700 dark:text-gray-300'}`}>
+                          {isOverspent ? (language === 'ar' ? 'تجاوز الميزانية' : 'Over budget') : `${pct}% ${language === 'ar' ? 'متبقي' : 'remaining'}`}
                         </Badge>
                       </div>
                     </>
@@ -1647,7 +1647,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.monthlyExpenses}</p>
-                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalSpent)}`}</p>
+                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.categories.reduce((s, c) => s + c.spentAmount, 0))}`}</p>
                   </div>
                   <div className="p-3 rounded-full bg-red-500">
                     <TrendingDown className="w-6 h-6 text-white" />
@@ -1655,7 +1655,7 @@ export default function Dashboard() {
                 </div>
                 <div className="mt-4">
                   <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
-                    {t.budgetUsed}: {activePlan.totalBudget > 0 ? `${Math.round((activePlan.totalSpent / activePlan.totalBudget) * 100)}%` : '0%'}
+                    {t.budgetUsed}: {activePlan.totalBudget > 0 ? `${Math.round((activePlan.categories.reduce((s, c) => s + c.spentAmount, 0) / activePlan.totalBudget) * 100)}%` : '0%'}
                   </Badge>
                 </div>
               </CardContent>
