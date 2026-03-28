@@ -998,18 +998,11 @@ export default function Dashboard() {
 
     const expenseAmount = Number.parseFloat(newExpense.amount)
 
-    // Validate: total expenses cannot exceed plan total budget
+    // Only block if total expenses would exceed total income
     const currentTotalSpent = activePlan.categories.reduce((sum, cat) => sum + cat.spentAmount, 0)
-    const planBudget = incomeData.totalIncome // totalIncome = net salary = plan budget
+    const planBudget = incomeData.totalIncome
     if (planBudget > 0 && currentTotalSpent + expenseAmount > planBudget) {
-      alert(`Cannot add this expense. Total expenses (${(currentTotalSpent + expenseAmount).toLocaleString()}) would exceed your plan budget (${planBudget.toLocaleString()}).`)
-      return
-    }
-
-    // Also validate: expense cannot exceed the category's budget
-    const category = activePlan.categories.find(cat => cat.id === newExpense.categoryId)
-    if (category && category.spentAmount + expenseAmount > category.budgetAmount) {
-      alert(`This expense exceeds the "${category.name}" category budget. Remaining: ${(category.budgetAmount - category.spentAmount).toLocaleString()}`)
+      alert(`Cannot add this expense. Total expenses (${(currentTotalSpent + expenseAmount).toLocaleString()}) would exceed your total income (${planBudget.toLocaleString()}).`)
       return
     }
 
@@ -1555,82 +1548,92 @@ export default function Dashboard() {
 
         {/* Overview Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-4">
-          {/* Income Card - clickable to set income */}
+          {/* Income Card - read only, set at plan creation */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
-            <Card
-              className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer"
-              onClick={() => {
-                setIncomeForm({ totalIncome: incomeData.totalIncome.toString(), netSalary: incomeData.netSalary.toString() })
-                setIsIncomeOpen(true)
-              }}
-            >
+            <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'إجمالي الدخل' : 'Total Income'}</p>
                     <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">
-                      {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.totalIncome)}` : <span className="text-sm text-gray-400">Click to set</span>}
+                      {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.totalIncome)}` : <span className="text-sm text-gray-400">{language === 'ar' ? 'غير محدد' : 'Not set'}</span>}
                     </p>
                   </div>
                   <div className="p-3 rounded-full bg-emerald-500">
                     <DollarSign className="w-6 h-6 text-white" />
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-gray-400">{language === 'ar' ? 'انقر للتعديل' : 'Click to edit'}</div>
+                <div className="mt-4 text-xs text-gray-400">{language === 'ar' ? 'الراتب الإجمالي للخطة' : 'Plan total budget'}</div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Net Salary Card */}
+          {/* Net Salary Card - auto calculated: totalIncome - totalSpent */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card
-              className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer"
-              onClick={() => {
-                setIncomeForm({ totalIncome: incomeData.totalIncome.toString(), netSalary: incomeData.netSalary.toString() })
-                setIsIncomeOpen(true)
-              }}
-            >
+            <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'}</p>
-                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">
-                      {incomeData.netSalary > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.netSalary)}` : <span className="text-sm text-gray-400">Click to set</span>}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-full bg-blue-500">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="mt-4 text-xs text-gray-400">
-                  {incomeData.totalIncome > 0 && incomeData.netSalary > 0
-                    ? `${Math.round((incomeData.netSalary / incomeData.totalIncome) * 100)}% of total income`
-                    : language === 'ar' ? 'انقر للتعديل' : 'Click to edit'}
-                </div>
+                {(() => {
+                  const totalSpent = activePlan.categories.reduce((s, c) => s + c.spentAmount, 0)
+                  const netSalary = incomeData.totalIncome - totalSpent
+                  const isNegative = netSalary < 0
+                  return (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'}</p>
+                          <p className={`text-2xl font-bold ${isNegative ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
+                            {incomeData.totalIncome > 0
+                              ? `${currencySymbols[activePlan.currency]}${formatNumber(netSalary)}`
+                              : <span className="text-sm text-gray-400">{language === 'ar' ? 'غير محدد' : 'Not set'}</span>}
+                          </p>
+                        </div>
+                        <div className={`p-3 rounded-full ${isNegative ? 'bg-red-500' : 'bg-blue-500'}`}>
+                          <Target className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+                      <div className="mt-4 text-xs text-gray-400">
+                        {incomeData.totalIncome > 0
+                          ? `${language === 'ar' ? 'المصروف:' : 'Spent:'} ${currencySymbols[activePlan.currency]}${formatNumber(totalSpent)}`
+                          : language === 'ar' ? 'الدخل - المصروفات' : 'Income - Expenses'}
+                      </div>
+                    </>
+                  )
+                })()}
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Remaining after expenses */}
+          {/* Remaining after expenses = totalIncome - totalSpent */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'المتبقي بعد المصروفات' : 'Remaining After Expenses'}</p>
-                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">
-                      {`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget - activePlan.totalSpent)}`}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-full bg-green-500">
-                    <PiggyBank className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
-                    {activePlan.totalBudget > 0 ? `${Math.round(((activePlan.totalBudget - activePlan.totalSpent) / activePlan.totalBudget) * 100)}% remaining` : '0% remaining'}
-                  </Badge>
-                </div>
+                {(() => {
+                  const totalSpent = activePlan.categories.reduce((s, c) => s + c.spentAmount, 0)
+                  const remaining = incomeData.totalIncome > 0 ? incomeData.totalIncome - totalSpent : activePlan.totalBudget - totalSpent
+                  const base = incomeData.totalIncome > 0 ? incomeData.totalIncome : activePlan.totalBudget
+                  const pct = base > 0 ? Math.round((remaining / base) * 100) : 0
+                  const isNegative = remaining < 0
+                  return (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'المتبقي بعد المصروفات' : 'Remaining After Expenses'}</p>
+                          <p className={`text-2xl font-bold ${isNegative ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
+                            {`${currencySymbols[activePlan.currency]}${formatNumber(remaining)}`}
+                          </p>
+                        </div>
+                        <div className={`p-3 rounded-full ${isNegative ? 'bg-red-500' : 'bg-green-500'}`}>
+                          <PiggyBank className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <Badge variant="secondary" className={`text-xs ${isNegative ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'dark:bg-gray-700 dark:text-gray-300'}`}>
+                          {pct}% {language === 'ar' ? 'متبقي' : 'remaining'}
+                        </Badge>
+                      </div>
+                    </>
+                  )
+                })()}
               </CardContent>
             </Card>
           </motion.div>
@@ -1681,56 +1684,7 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        {/* Income Dialog */}
-        <Dialog open={isIncomeOpen} onOpenChange={setIsIncomeOpen}>
-          <DialogContent className="sm:max-w-md dark:bg-gray-800">
-            <DialogHeader>
-              <DialogTitle className="dark:text-gray-100">{language === 'ar' ? 'تعيين الدخل' : 'Set Income'}</DialogTitle>
-              <DialogDescription className="dark:text-gray-400">
-                {language === 'ar' ? 'أدخل إجمالي دخلك وصافي راتبك' : 'Enter your total income and net salary'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div>
-                <Label className="dark:text-gray-300">{language === 'ar' ? 'إجمالي الدخل' : 'Total Income'} ({currencySymbols[activePlan.currency]})</Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={incomeForm.totalIncome}
-                  onChange={e => setIncomeForm(f => ({ ...f, totalIncome: e.target.value }))}
-                  className="mt-1 dark:bg-gray-700 dark:text-gray-100"
-                />
-              </div>
-              <div>
-                <Label className="dark:text-gray-300">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'} ({currencySymbols[activePlan.currency]})</Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={incomeForm.netSalary}
-                  onChange={e => setIncomeForm(f => ({ ...f, netSalary: e.target.value }))}
-                  className="mt-1 dark:bg-gray-700 dark:text-gray-100"
-                />
-              </div>
-              <Button
-                className="w-full bg-[#084f5a] hover:bg-[#063d47] text-white"
-                onClick={() => {
-                  const data = {
-                    totalIncome: parseFloat(incomeForm.totalIncome) || 0,
-                    netSalary: parseFloat(incomeForm.netSalary) || 0,
-                  }
-                  setIncomeData(data)
-                  localStorage.setItem(`cashcraft_income_${activePlan.id}`, JSON.stringify(data))
-                  // Save to backend
-                  const token = localStorage.getItem('cashcraft_accessToken') || undefined
-                  apiSaveIncome(activePlan.id, data.totalIncome, data.netSalary, token).catch(console.error)
-                  setIsIncomeOpen(false)
-                }}
-              >
-                {language === 'ar' ? 'حفظ' : 'Save'}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Income Dialog removed - Total Income is set at plan creation and is read-only */}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
@@ -1842,7 +1796,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {expenses.slice(0, 5).map((expense, index) => {
+                  {expenses.filter(e => activePlan.categories.some(c => c.id === e.categoryId)).slice(0, 5).map((expense, index) => {
                     const category = activePlan.categories.find((cat) => cat.id === expense.categoryId)
                     return (
                       <motion.div
@@ -1960,12 +1914,14 @@ export default function Dashboard() {
                                     const token = localStorage.getItem('cashcraft_accessToken') || undefined
                                     await apiDeleteCategory(category.id, token)
                                     console.log(`✅ Category "${translatedName}" deleted from backend`)
-                                    // Only remove from UI if backend succeeded
+                                    // Remove from UI
                                     const updatedCategories = activePlan.categories.filter(c => c.id !== category.id)
-                                    const updatedPlan = { ...activePlan, categories: updatedCategories }
+                                    const updatedPlan = { ...activePlan, categories: updatedCategories, totalBudget: updatedCategories.reduce((s, c) => s + c.budgetAmount, 0) }
                                     setActivePlan(updatedPlan)
                                     const updatedPlans = plans.map(p => p.id === activePlan.id ? updatedPlan : p)
                                     setPlans(updatedPlans)
+                                    // Also remove expenses belonging to this category from local state
+                                    setExpenses(prev => prev.filter(e => e.categoryId !== category.id))
                                     localStorage.setItem('cashcraft_plans', JSON.stringify(updatedPlans))
                                   } catch (e: any) {
                                     console.error("❌ Delete category failed:", e?.message)
