@@ -162,7 +162,7 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                     <h2 className="text-2xl font-semibold">{translations.title}</h2>
                     <p className="text-white/90 text-sm mt-1">{translations.subtitle} "{planName}"</p>
                     {totalBudgetLimit > 0 && (
-                      <p className="text-white/80 text-sm mt-1">Plan Budget: {totalBudgetLimit.toLocaleString()} {currency}</p>
+                      <p className="text-white/80 text-sm mt-1">Remaining Budget: {totalBudgetLimit.toLocaleString()} {currency}</p>
                     )}
                   </div>
                   <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-white/20">
@@ -268,7 +268,7 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                     </div>
                     {totalBudgetLimit > 0 && (
                       <div className="flex items-center justify-between text-sm mt-1">
-                        <span className="text-gray-500 dark:text-gray-400">Plan Budget: {totalBudgetLimit.toLocaleString()}</span>
+                        <span className="text-gray-500 dark:text-gray-400">Remaining Budget: {totalBudgetLimit.toLocaleString()}</span>
                         <span className={`font-semibold ${isOverLimit ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                           Remaining: {(totalBudgetLimit - getTotalBudget()).toLocaleString()}
                         </span>

@@ -2200,7 +2200,11 @@ export default function Dashboard() {
           onClose={() => setIsAddDetailsOpen(false)}
           onSave={handleAddCategories}
           planName={activePlan?.name || newPlan.name || "Your Plan"}
-          totalBudgetLimit={incomeData.totalIncome > 0 ? incomeData.totalIncome : (parseFloat(newPlan.totalAmount) || 0)}
+          totalBudgetLimit={(() => {
+            const base = incomeData.totalIncome > 0 ? incomeData.totalIncome : (parseFloat(newPlan.totalAmount) || 0)
+            const alreadyAllocated = activePlan?.categories.reduce((s, c) => s + c.budgetAmount, 0) || 0
+            return Math.max(0, base - alreadyAllocated)
+          })()}
           currency={activePlan?.currency || newPlan.currency}
           existingCategoryNames={activePlan?.categories.map(c => c.name) || []}
         />
