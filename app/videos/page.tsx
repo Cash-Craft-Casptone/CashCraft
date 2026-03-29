@@ -2,25 +2,40 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Search, Play, User, Eye, BookmarkCheck, Bookmark } from "lucide-react"
+import { Search, Play, User, BookmarkCheck, Bookmark } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import Link from "next/link"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { Navbar } from "@/components/Navbar"
+import { apiGetVideos } from "@/lib/api"
 
 export default function VideosPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [bookmarkedVideos, setBookmarkedVideos] = useState<string[]>([])
-  const { language, isDark } = useApp()
+  const [videos, setVideos] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const { language } = useApp()
   const t = translations[language]
 
   useEffect(() => {
     const savedBookmarks = JSON.parse(localStorage.getItem("bookmarkedVideos") || "[]")
     setBookmarkedVideos(savedBookmarks)
+    loadVideos()
   }, [])
+
+  const loadVideos = async () => {
+    try {
+      setLoading(true)
+      const data = await apiGetVideos()
+      setVideos(data)
+    } catch (error) {
+      console.error("Failed to load videos:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const categories = [
     { id: "all", name: language === "ar" ? "الكل" : "All" },
@@ -28,51 +43,6 @@ export default function VideosPage() {
     { id: "saving", name: language === "ar" ? "الادخار" : "Saving" },
     { id: "investing", name: language === "ar" ? "الاستثمار" : "Investing" },
     { id: "credit", name: language === "ar" ? "الائتمان" : "Credit" },
-  ]
-
-  const videos = [
-    {
-      id: "1",
-      title: language === "ar" ? "أساسيات الميزانية للمبتدئين" : "Budgeting Basics for Beginners",
-      description:
-        language === "ar"
-          ? "تعلم كيفية إنشاء ميزانية فعالة خطوة بخطوة"
-          : "Learn how to create an effective budget step by step",
-      category: "budgeting",
-      duration: "12:34",
-      views: "15.2K",
-      instructor: language === "ar" ? "أحمد محمد" : "Ahmed Mohamed",
-      thumbnail: "/budgeting-video.png",
-      date: "2024-01-15",
-    },
-    {
-      id: "2",
-      title: language === "ar" ? "استراتيجيات الادخار الذكية" : "Smart Saving Strategies",
-      description:
-        language === "ar"
-          ? "اكتشف طرق ذكية لادخار المال وبناء ثروتك"
-          : "Discover smart ways to save money and build your wealth",
-      category: "saving",
-      duration: "18:45",
-      views: "23.1K",
-      instructor: language === "ar" ? "فاطمة علي" : "Fatima Ali",
-      thumbnail: "/saving-strategies.png",
-      date: "2024-01-12",
-    },
-    {
-      id: "3",
-      title: language === "ar" ? "مقدمة في الاستثمار" : "Introduction to Investing",
-      description:
-        language === "ar"
-          ? "دليل المبتدئين للاستثمار في الأسواق المالية"
-          : "A beginner's guide to investing in financial markets",
-      category: "investing",
-      duration: "25:18",
-      views: "31.7K",
-      instructor: language === "ar" ? "محمد حسن" : "Mohamed Hassan",
-      thumbnail: "/investing-intro.png",
-      date: "2024-01-10",
-    },
   ]
 
   const toggleBookmark = (videoId: string) => {
@@ -85,11 +55,12 @@ export default function VideosPage() {
   }
 
   const filteredVideos = videos.filter((video) => {
+    const title = language === "ar" ? video.titleAr : video.titleEn
+    const description = language === "ar" ? video.descriptionAr : video.descriptionEn
     const matchesSearch =
-      video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      video.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || video.category === selectedCategory
-    return matchesSearch && matchesCategory
+      title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      description?.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesSearch
   })
 
   return (
@@ -151,17 +122,25 @@ export default function VideosPage() {
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
             >
               <div className="relative group">
-                <img
-                  src={video.thumbnail || "/placeholder.svg"}
-                  alt={video.title}
-                  className="w-full h-40 sm:h-48 object-cover"
-                />
+                {video.thumbnailUrl || video.coverUrl ? (
+                  <img
+                    src={video.thumbnailUrl || video.coverUrl}
+                    alt={language === "ar" ? video.titleAr : video.titleEn}
+                    className="w-full h-40 sm:h-48 object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden') }}
+                  />
+                ) : null}
+                <div className={`w-full h-40 sm:h-48 bg-gradient-to-br from-blue-400 to-teal-600 flex items-center justify-center ${(video.thumbnailUrl || video.coverUrl) ? 'hidden' : ''}`}>
+                  <Play className="w-16 h-16 text-white opacity-60" />
+                </div>
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Play className="w-12 h-12 text-white" />
                 </div>
-                <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
-                  {video.duration}
-                </div>
+                {video.durationSec && (
+                  <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
+                    {Math.floor(video.durationSec / 60)}:{String(video.durationSec % 60).padStart(2, '0')}
+                  </div>
+                )}
                 <button
                   onClick={() => toggleBookmark(video.id)}
                   className="absolute top-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors"
@@ -177,27 +156,29 @@ export default function VideosPage() {
               <div className="p-4 sm:p-6">
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                   <span className="px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full text-xs">
-                    {categories.find((c) => c.id === video.category)?.name}
+                    {language === "ar" ? "فيديو" : "Video"}
                   </span>
-                  <Eye className="w-4 h-4" />
-                  <span>{video.views}</span>
                 </div>
 
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2">{video.title}</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2">
+                  {language === "ar" ? video.titleAr : video.titleEn}
+                </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{video.description}</p>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+                  {language === "ar" ? video.descriptionAr : video.descriptionEn}
+                </p>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <User className="w-4 h-4" />
-                    <span>{video.instructor}</span>
+                    <span>{language === "ar" ? "المؤلف" : "Author"}</span>
                   </div>
 
-                  <Link href={`/videos/${video.id}`}>
+                  <a href={video.url} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" className="bg-[#6099a5] hover:bg-[#084f5a] text-white">
                       {t.watch}
                     </Button>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </motion.div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, useScroll } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun, Globe, Menu, X, User, LogOut } from "lucide-react"
+import { Moon, Sun, Globe, Menu, X, User, LogOut, Settings } from "lucide-react"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { useRouter } from "next/navigation"
@@ -139,6 +139,14 @@ export function Navbar() {
                   size="sm"
                 >
                   <User className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/settings")}
+                  className="border-[#6B9FAD] text-[#6B9FAD] hover:bg-[#6B9FAD] hover:text-white dark:border-[#6B9FAD] dark:text-[#6B9FAD] dark:hover:bg-[#6B9FAD] dark:hover:text-white"
+                >
+                  <Settings className="w-4 h-4" />
                 </Button>
                 <Button
                   variant="outline"

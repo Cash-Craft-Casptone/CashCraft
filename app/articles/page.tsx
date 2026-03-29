@@ -178,11 +178,17 @@ export default function ArticlesPage() {
               onClick={() => markAsRead(article.id)}
             >
               <div className="relative">
-                <img
-                  src={article.image || "/placeholder.svg"}
-                  alt={article.title}
-                  className="w-full h-40 sm:h-48 object-cover"
-                />
+                {article.coverUrl ? (
+                  <img
+                    src={article.coverUrl}
+                    alt={language === "ar" ? article.titleAr : article.titleEn}
+                    className="w-full h-40 sm:h-48 object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden') }}
+                  />
+                ) : null}
+                <div className={`w-full h-40 sm:h-48 bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center ${article.coverUrl ? 'hidden' : ''}`}>
+                  <BookOpen className="w-16 h-16 text-white opacity-60" />
+                </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation()

@@ -933,20 +933,34 @@ export default function Dashboard() {
       // Close modal
       setIsAddDetailsOpen(false)
       
-      // Reload plans from database
+      // Reload plans from database but preserve existing spentAmounts from local expenses
       try {
         const apiPlans = await apiGetPlans(accessToken)
         if (apiPlans && apiPlans.length > 0) {
-          // Transform the data to match frontend expectations
           const transformedPlans = transformApiPlans(apiPlans)
           
-          setPlans(transformedPlans)
-          // Keep the same active plan selected
-          const updatedActivePlan = transformedPlans.find(p => p.id === activePlan.id)
-          if (updatedActivePlan) {
-            setActivePlan(updatedActivePlan)
-          }
-          console.log("✅ Plans reloaded from database")
+          // Recalculate spentAmounts from local expenses state (source of truth for spending)
+          const restoredPlans = transformedPlans.map(tp => {
+            if (tp.id !== activePlan.id) return tp
+            const updatedCategories = tp.categories.map((newCat: any) => {
+              // Check existing cat first (for categories that existed before)
+              const existingCat = activePlan.categories.find((c: any) => c.id === newCat.id)
+              const spentFromExpenses = expenses
+                .filter(e => e.categoryId === newCat.id && e.planId === activePlan.id)
+                .reduce((s, e) => s + e.amount, 0)
+              return { ...newCat, spentAmount: spentFromExpenses || (existingCat?.spentAmount ?? 0) }
+            })
+            return {
+              ...tp,
+              categories: updatedCategories,
+              totalSpent: updatedCategories.reduce((s: number, c: any) => s + c.spentAmount, 0)
+            }
+          })
+
+          setPlans(restoredPlans)
+          const updatedActivePlan = restoredPlans.find((p: any) => p.id === activePlan.id)
+          if (updatedActivePlan) setActivePlan(updatedActivePlan)
+          console.log("✅ Plans reloaded, spentAmounts preserved from expenses")
         }
       } catch (reloadError) {
         console.error("❌ Failed to reload plans:", reloadError)
