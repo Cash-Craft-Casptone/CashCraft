@@ -1199,12 +1199,12 @@ export default function Dashboard() {
     return (
       <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
         <Navbar />
-        <div className="max-w-7xl mx-auto p-6 pt-32">
-          <div className="text-center py-20">
-            <h2 className="text-2xl font-semibold text-gray-700 dark:text-emerald-300 mb-4">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 pt-28 sm:pt-32">
+          <div className="text-center py-10 sm:py-20">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 dark:text-emerald-300 mb-4">
               {t.noBudgetPlanFound}
             </h2>
-            <p className="text-gray-500 dark:text-gray-300 mb-8">
+            <p className="text-gray-500 dark:text-gray-300 mb-8 px-4">
               {t.createFirstBudget}
             </p>
             <motion.button
@@ -1216,9 +1216,9 @@ export default function Dashboard() {
                 e.stopPropagation()
                 setIsCreatePlanOpen(true)
               }}
-              className="px-8 py-4 bg-[#6B9FAD] hover:bg-[#5A8A98] text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3 text-lg mx-auto cursor-pointer"
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-[#6B9FAD] hover:bg-[#5A8A98] text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3 text-base sm:text-lg mx-auto cursor-pointer"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               {t.createBudgetPlan}
@@ -1474,7 +1474,7 @@ export default function Dashboard() {
   return (
     <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
       <Navbar />
-      <div className="max-w-7xl mx-auto p-6 pt-32">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 pt-28 sm:pt-32">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -1561,31 +1561,31 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-4">
-          {/* Income Card - read only, set at plan creation */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-6 mb-3 sm:mb-4">
+          {/* Income Card */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'إجمالي الدخل' : 'Total Income'}</p>
-                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">
-                      {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.totalIncome)}` : <span className="text-sm text-gray-400">{language === 'ar' ? 'غير محدد' : 'Not set'}</span>}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{language === 'ar' ? 'الدخل' : 'Income'}</p>
+                    <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">
+                      {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.totalIncome)}` : <span className="text-xs text-gray-400">-</span>}
                     </p>
                   </div>
-                  <div className="p-3 rounded-full bg-emerald-500">
-                    <DollarSign className="w-6 h-6 text-white" />
+                  <div className="p-1.5 sm:p-3 rounded-full bg-emerald-500 ml-1 flex-shrink-0">
+                    <DollarSign className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
-                <div className="mt-4 text-xs text-gray-400">{language === 'ar' ? 'الراتب الإجمالي للخطة' : 'Plan total budget'}</div>
+                <div className="mt-1 sm:mt-4 text-xs text-gray-400 hidden sm:block">{language === 'ar' ? 'الراتب الإجمالي للخطة' : 'Plan total budget'}</div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Net Salary Card - totalIncome - totalSpent (what's left of your income after actual spending) */}
+          {/* Net Salary Card */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 {(() => {
                   const totalSpent = activePlan.categories.reduce((s, c) => s + c.spentAmount, 0)
                   const netSalary = incomeData.totalIncome - totalSpent
@@ -1593,22 +1593,18 @@ export default function Dashboard() {
                   return (
                     <>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'}</p>
-                          <p className={`text-2xl font-bold ${isNegative ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
-                            {incomeData.totalIncome > 0
-                              ? `${currencySymbols[activePlan.currency]}${formatNumber(netSalary)}`
-                              : <span className="text-sm text-gray-400">{language === 'ar' ? 'غير محدد' : 'Not set'}</span>}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'}</p>
+                          <p className={`text-sm sm:text-2xl font-bold truncate ${isNegative ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
+                            {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(netSalary)}` : <span className="text-xs text-gray-400">-</span>}
                           </p>
                         </div>
-                        <div className={`p-3 rounded-full ${isNegative ? 'bg-red-500' : 'bg-blue-500'}`}>
-                          <Target className="w-6 h-6 text-white" />
+                        <div className={`p-1.5 sm:p-3 rounded-full ml-1 flex-shrink-0 ${isNegative ? 'bg-red-500' : 'bg-blue-500'}`}>
+                          <Target className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
                         </div>
                       </div>
-                      <div className="mt-4 text-xs text-gray-400">
-                        {incomeData.totalIncome > 0
-                          ? `${language === 'ar' ? 'المصروف:' : 'Spent:'} ${currencySymbols[activePlan.currency]}${formatNumber(totalSpent)}`
-                          : language === 'ar' ? 'الدخل - المصروفات' : 'Income - Spent'}
+                      <div className="mt-1 sm:mt-4 text-xs text-gray-400 hidden sm:block">
+                        {incomeData.totalIncome > 0 ? `${language === 'ar' ? 'المصروف:' : 'Spent:'} ${currencySymbols[activePlan.currency]}${formatNumber(totalSpent)}` : ''}
                       </div>
                     </>
                   )
@@ -1617,10 +1613,10 @@ export default function Dashboard() {
             </Card>
           </motion.div>
 
-          {/* Remaining after expenses = totalBudget - totalSpent (how much of allocated budget is left) */}
+          {/* Remaining after expenses */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 {(() => {
                   const totalSpent = activePlan.categories.reduce((s, c) => s + c.spentAmount, 0)
                   const totalBudget = activePlan.categories.reduce((s, c) => s + c.budgetAmount, 0)
@@ -1630,19 +1626,19 @@ export default function Dashboard() {
                   return (
                     <>
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{language === 'ar' ? 'المتبقي بعد المصروفات' : 'Remaining After Expenses'}</p>
-                          <p className={`text-2xl font-bold ${isOverspent ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{language === 'ar' ? 'المتبقي' : 'Remaining'}</p>
+                          <p className={`text-sm sm:text-2xl font-bold truncate ${isOverspent ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
                             {`${currencySymbols[activePlan.currency]}${formatNumber(remaining)}`}
                           </p>
                         </div>
-                        <div className={`p-3 rounded-full ${isOverspent ? 'bg-red-500' : 'bg-green-500'}`}>
-                          <PiggyBank className="w-6 h-6 text-white" />
+                        <div className={`p-1.5 sm:p-3 rounded-full ml-1 flex-shrink-0 ${isOverspent ? 'bg-red-500' : 'bg-green-500'}`}>
+                          <PiggyBank className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
                         </div>
                       </div>
-                      <div className="mt-4">
+                      <div className="mt-1 sm:mt-4 hidden sm:block">
                         <Badge variant="secondary" className={`text-xs ${isOverspent ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'dark:bg-gray-700 dark:text-gray-300'}`}>
-                          {isOverspent ? (language === 'ar' ? 'تجاوز الميزانية' : 'Over budget') : `${pct}% ${language === 'ar' ? 'متبقي' : 'remaining'}`}
+                          {isOverspent ? (language === 'ar' ? 'تجاوز' : 'Over') : `${pct}%`}
                         </Badge>
                       </div>
                     </>
@@ -1654,20 +1650,20 @@ export default function Dashboard() {
         </div>
 
         {/* Secondary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-2 gap-2 sm:gap-6 mb-4 sm:mb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.monthlyExpenses}</p>
-                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.categories.reduce((s, c) => s + c.spentAmount, 0))}`}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{t.monthlyExpenses}</p>
+                    <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.categories.reduce((s, c) => s + c.spentAmount, 0))}`}</p>
                   </div>
-                  <div className="p-3 rounded-full bg-red-500">
-                    <TrendingDown className="w-6 h-6 text-white" />
+                  <div className="p-1.5 sm:p-3 rounded-full bg-red-500 ml-1 flex-shrink-0">
+                    <TrendingDown className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="mt-1 sm:mt-4 hidden sm:block">
                   <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
                     {t.budgetUsed}: {activePlan.totalBudget > 0 ? `${Math.round((activePlan.categories.reduce((s, c) => s + c.spentAmount, 0) / activePlan.totalBudget) * 100)}%` : '0%'}
                   </Badge>
@@ -1678,17 +1674,17 @@ export default function Dashboard() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <Card className="hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardContent className="p-6">
+              <CardContent className="p-3 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{t.totalBalance}</p>
-                    <p className="text-2xl font-bold text-[#084f5a] dark:text-emerald-400">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget)}`}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{t.totalBalance}</p>
+                    <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget)}`}</p>
                   </div>
-                  <div className="p-3 rounded-full bg-purple-500">
-                    <PieChart className="w-6 h-6 text-white" />
+                  <div className="p-1.5 sm:p-3 rounded-full bg-purple-500 ml-1 flex-shrink-0">
+                    <PieChart className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="mt-1 sm:mt-4 hidden sm:block">
                   <Badge variant="secondary" className="text-xs dark:bg-gray-700 dark:text-gray-300">
                     {activePlan.categories.length} {language === 'ar' ? 'فئة' : 'categories'}
                   </Badge>

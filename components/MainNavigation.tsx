@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, useScroll } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun, Globe, Menu, X, User, LogOut } from "lucide-react"
+import { Moon, Sun, Globe, Menu, X, User, LogOut, Settings } from "lucide-react"
 import { useApp } from "@/contexts/AppContext"
 import { translations } from "@/lib/translations"
 import { useRouter } from "next/navigation"
@@ -137,6 +137,20 @@ export function MainNavigation() {
                 >
                   <User className="w-4 h-4 mr-2" />
                   {currentUser.displayName}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/settings")}
+                  className={`${
+                    isDark
+                      ? "border-white/20 text-white hover:bg-white/20"
+                      : isScrolled
+                      ? "border-white/20 text-white hover:bg-white/20"
+                      : "border-[#084f5a] text-[#084f5a] hover:bg-[#084f5a] hover:text-white"
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
                 </Button>
                 <Button
                   variant="outline"

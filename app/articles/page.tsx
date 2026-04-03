@@ -18,48 +18,27 @@ export default function ArticlesPage() {
   const [readArticles, setReadArticles] = useState<string[]>([])
   const [articles, setArticles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const { language, isDark } = useApp()
+  const { language } = useApp()
   const t = translations[language]
 
   useEffect(() => {
-    const savedBookmarks = JSON.parse(localStorage.getItem("bookmarkedArticles") || "[]")
-    setBookmarkedArticles(savedBookmarks)
-    
-    const savedRead = JSON.parse(localStorage.getItem("readArticles") || "[]")
-    setReadArticles(savedRead)
-    
+    setBookmarkedArticles(JSON.parse(localStorage.getItem("bookmarkedArticles") || "[]"))
+    setReadArticles(JSON.parse(localStorage.getItem("readArticles") || "[]"))
     loadArticles()
   }, [])
 
-  const loadArticles = async () => {
-    try {
-      setLoading(true)
-      const data = await apiGetArticles()
-      setArticles(data)
-    } catch (error) {
-      console.error("Failed to load articles:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Reload read articles when page becomes visible
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        const savedRead = JSON.parse(localStorage.getItem("readArticles") || "[]")
-        setReadArticles(savedRead)
-      }
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    window.addEventListener("focus", handleVisibilityChange)
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-      window.removeEventListener("focus", handleVisibilityChange)
-    }
+    const handler = () => setReadArticles(JSON.parse(localStorage.getItem("readArticles") || "[]"))
+    document.addEventListener("visibilitychange", handler)
+    window.addEventListener("focus", handler)
+    return () => { document.removeEventListener("visibilitychange", handler); window.removeEventListener("focus", handler) }
   }, [])
+
+  const loadArticles = async () => {
+    try { setLoading(true); setArticles(await apiGetArticles()) }
+    catch (e) { console.error(e) }
+    finally { setLoading(false) }
+  }
 
   const categories = [
     { id: "all", name: language === "ar" ? "الكل" : "All" },
@@ -70,191 +49,110 @@ export default function ArticlesPage() {
     { id: "taxes", name: language === "ar" ? "الضرائب" : "Taxes" },
   ]
 
-  const toggleBookmark = (articleId: string) => {
-    const updatedBookmarks = bookmarkedArticles.includes(articleId)
-      ? bookmarkedArticles.filter((id) => id !== articleId)
-      : [...bookmarkedArticles, articleId]
-
-    setBookmarkedArticles(updatedBookmarks)
-    localStorage.setItem("bookmarkedArticles", JSON.stringify(updatedBookmarks))
+  const toggleBookmark = (id: string) => {
+    const updated = bookmarkedArticles.includes(id) ? bookmarkedArticles.filter(b => b !== id) : [...bookmarkedArticles, id]
+    setBookmarkedArticles(updated)
+    localStorage.setItem("bookmarkedArticles", JSON.stringify(updated))
   }
 
-  const markAsRead = (articleId: string) => {
-    if (!readArticles.includes(articleId)) {
-      const updatedRead = [...readArticles, articleId]
-      setReadArticles(updatedRead)
-      localStorage.setItem("readArticles", JSON.stringify(updatedRead))
+  const markAsRead = (id: string) => {
+    if (!readArticles.includes(id)) {
+      const updated = [...readArticles, id]
+      setReadArticles(updated)
+      localStorage.setItem("readArticles", JSON.stringify(updated))
     }
   }
 
-  const filteredArticles = articles.filter((article) => {
-    const title = language === "ar" ? article.titleAr : article.titleEn
-    const description = language === "ar" ? article.descriptionAr : article.descriptionEn
-    
-    const matchesSearch =
-      title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      description?.toLowerCase().includes(searchTerm.toLowerCase())
-    // For now, show all categories since we don't have category field in DB
-    const matchesCategory = selectedCategory === "all"
-    return matchesSearch && matchesCategory
+  const filteredArticles = articles.filter(a => {
+    const title = language === "ar" ? a.titleAr : a.titleEn
+    const desc = language === "ar" ? a.descriptionAr : a.descriptionEn
+    return title?.toLowerCase().includes(searchTerm.toLowerCase()) || desc?.toLowerCase().includes(searchTerm.toLowerCase())
   })
 
-  if (loading) {
-    return (
-      <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
-        <Navbar />
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <BookOpen className="w-16 h-16 text-teal-600 mx-auto mb-4 animate-pulse" />
-            <p className="text-gray-600 dark:text-gray-300">Loading articles...</p>
-          </div>
-        </div>
+  if (loading) return (
+    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <Navbar />
+      <div className="flex items-center justify-center h-screen">
+        <BookOpen className="w-12 h-12 text-teal-600 animate-pulse" />
       </div>
-    )
-  }
+    </div>
+  )
 
   return (
     <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-8">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-[#084f5a] dark:text-white mb-4">
-            {t.educationalArticles}
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            {t.educationalArticlesDesc}
-          </p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-5 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl font-bold text-[#084f5a] dark:text-white mb-2 sm:mb-4">{t.educationalArticles}</h1>
+          <p className="text-sm sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto hidden sm:block">{t.educationalArticlesDesc}</p>
         </motion.div>
 
         {/* Search and Filter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8 space-y-4"
-        >
-          <div className="flex flex-col sm:flex-row gap-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-4 sm:mb-8 space-y-2 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                type="text"
-                placeholder={t.searchArticles}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input type="text" placeholder={t.searchArticles} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 h-9 sm:h-10 text-sm" />
             </div>
-            <div className="flex gap-2 overflow-x-auto">
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.id)}
-                  className="whitespace-nowrap"
-                >
-                  {category.name}
+            <div className="flex gap-1.5 overflow-x-auto pb-1">
+              {categories.map(cat => (
+                <Button key={cat.id} variant={selectedCategory === cat.id ? "default" : "outline"} size="sm"
+                  onClick={() => setSelectedCategory(cat.id)} className="whitespace-nowrap text-xs h-8 px-2.5">
+                  {cat.name}
                 </Button>
               ))}
             </div>
           </div>
         </motion.div>
 
-        {/* Articles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Articles Grid - 2 cols on mobile */}
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
           {filteredArticles.map((article, index) => {
             const isRead = readArticles.includes(article.id)
-            
             return (
-            <motion.div
-              key={article.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer ${
-                isRead ? "border-2 border-green-200 dark:border-green-800" : ""
-              }`}
-              onClick={() => markAsRead(article.id)}
-            >
-              <div className="relative">
-                {article.coverUrl ? (
-                  <img
-                    src={article.coverUrl}
-                    alt={language === "ar" ? article.titleAr : article.titleEn}
-                    className="w-full h-40 sm:h-48 object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden') }}
-                  />
-                ) : null}
-                <div className={`w-full h-40 sm:h-48 bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center ${article.coverUrl ? 'hidden' : ''}`}>
-                  <BookOpen className="w-16 h-16 text-white opacity-60" />
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    toggleBookmark(article.id)
-                  }}
-                  className="absolute top-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors"
-                >
-                  {bookmarkedArticles.includes(article.id) ? (
-                    <BookmarkCheck className="w-5 h-5 text-teal-600" />
-                  ) : (
-                    <Bookmark className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  )}
-                </button>
-                {isRead && (
-                  <div className="absolute top-4 left-4 p-2 bg-green-500 rounded-full">
-                    <BookmarkCheck className="w-5 h-5 text-white" />
+              <motion.div key={article.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
+                className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all cursor-pointer ${isRead ? "border-2 border-green-200 dark:border-green-800" : ""}`}
+                onClick={() => markAsRead(article.id)}>
+                <div className="relative">
+                  {article.coverUrl ? (
+                    <img src={article.coverUrl} alt={language === "ar" ? article.titleAr : article.titleEn}
+                      className="w-full h-24 sm:h-48 object-cover"
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden') }} />
+                  ) : null}
+                  <div className={`w-full h-24 sm:h-48 bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center ${article.coverUrl ? 'hidden' : ''}`}>
+                    <BookOpen className="w-8 sm:w-16 h-8 sm:h-16 text-white opacity-60" />
                   </div>
-                )}
-              </div>
-
-              <div className="p-4 sm:p-6">
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
-                  <span className="px-2 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full text-xs">
-                    {language === "ar" ? "مقال" : "Article"}
-                  </span>
-                  <Clock className="w-4 h-4" />
-                  <span>5 min</span>
+                  <button onClick={e => { e.stopPropagation(); toggleBookmark(article.id) }}
+                    className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full">
+                    {bookmarkedArticles.includes(article.id)
+                      ? <BookmarkCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-teal-600" />
+                      : <Bookmark className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />}
+                  </button>
                 </div>
-
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2 flex items-center gap-2">
-                  {language === "ar" ? article.titleAr : article.titleEn}
-                  {isRead && <BookmarkCheck className="w-5 h-5 text-green-500 flex-shrink-0" />}
-                </h3>
-
-                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                  {language === "ar" ? article.descriptionAr : article.descriptionEn}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <User className="w-4 h-4" />
-                    <span>{language === "ar" ? "المؤلف" : "Author"}</span>
-                  </div>
-
-                  <Link href={`/articles/${article.id}`} onClick={(e) => e.stopPropagation()}>
-                    <Button size="sm" className="bg-[#6099a5] hover:bg-[#084f5a] text-white">
-                      {isRead ? (language === "ar" ? "إعادة القراءة" : "Read Again") : t.readMore}
+                <div className="p-2.5 sm:p-6">
+                  <h3 className="text-xs sm:text-xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-3 line-clamp-2">
+                    {language === "ar" ? article.titleAr : article.titleEn}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-2 sm:mb-4 line-clamp-2 text-xs sm:text-base hidden sm:block">
+                    {language === "ar" ? article.descriptionAr : article.descriptionEn}
+                  </p>
+                  <Link href={`/articles/${article.id}`} onClick={e => e.stopPropagation()}>
+                    <Button size="sm" className="bg-[#6099a5] hover:bg-[#084f5a] text-white w-full text-xs h-7 sm:h-9 sm:text-sm">
+                      {isRead ? (language === "ar" ? "إعادة" : "Reread") : t.readMore}
                     </Button>
                   </Link>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
             )
           })}
         </div>
 
         {filteredArticles.length === 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {t.noArticlesFound}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              {t.tryChangingSearch}
-            </p>
-          </motion.div>
+          <div className="text-center py-12">
+            <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t.noArticlesFound}</h3>
+          </div>
         )}
       </div>
     </div>

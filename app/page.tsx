@@ -137,7 +137,7 @@ export default function LandingPage() {
           </motion.div>
           
           <motion.h1
-            className={`text-4xl md:text-7xl font-bold mb-6 text-[#333] dark:text-white leading-tight`}
+            className={`text-3xl sm:text-4xl md:text-7xl font-bold mb-6 text-[#333] dark:text-white leading-tight`}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
@@ -145,7 +145,7 @@ export default function LandingPage() {
             {t.smartMoneyManagement}
           </motion.h1>
           <motion.h2
-            className={`text-2xl md:text-5xl font-bold mb-8 text-[#6099a5] dark:text-[#6099a5]`}
+            className={`text-xl sm:text-2xl md:text-5xl font-bold mb-8 text-[#6099a5] dark:text-[#6099a5]`}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
@@ -153,7 +153,7 @@ export default function LandingPage() {
             {t.achieveYourGoals}
           </motion.h2>
           <motion.p
-            className={`text-xl md:text-2xl mb-12 max-w-4xl mx-auto leading-relaxed text-[#333] dark:text-gray-300`}
+            className={`text-base sm:text-xl md:text-2xl mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed text-[#333] dark:text-gray-300`}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
@@ -168,14 +168,14 @@ export default function LandingPage() {
             transition={{ delay: 0.8, duration: 0.8 }}
           >
             <Button
-              className="bg-[#6099a5] hover:bg-[#084f5a] text-white px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              className="bg-[#6099a5] hover:bg-[#084f5a] text-white px-6 sm:px-10 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
               onClick={() => router.push("/register")}
             >
               🚀 {t.tryNow}
             </Button>
             <Button
               variant="outline"
-              className="border-2 border-[#6099a5] text-[#6099a5] hover:bg-[#6099a5] hover:text-white px-10 py-4 text-lg font-semibold rounded-xl bg-white/80 backdrop-blur-sm hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+              className="border-2 border-[#6099a5] text-[#6099a5] hover:bg-[#6099a5] hover:text-white px-6 sm:px-10 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl bg-white/80 backdrop-blur-sm hover:shadow-lg transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
               onClick={() => router.push("/dashboard")}
             >
               📊 {t.viewDashboard}
@@ -185,24 +185,24 @@ export default function LandingPage() {
       </section>
 
       {/* Quote Cards Section */}
-      <section className="py-24 px-4 bg-white dark:bg-black">
+      <section className="py-12 sm:py-24 px-4 bg-white dark:bg-black">
         <div className="container mx-auto">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className={`text-4xl md:text-5xl font-bold mb-6 text-[#333] dark:text-white`}>
+            <h2 className={`text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-[#333] dark:text-white`}>
               {t.financialWisdom}
             </h2>
-            <p className={`text-xl text-[#333] dark:text-gray-300 max-w-2xl mx-auto`}>
+            <p className={`text-base sm:text-xl text-[#333] dark:text-gray-300 max-w-2xl mx-auto`}>
               {t.financialWisdomDesc}
             </p>
           </motion.div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
               { quote: t.learnQuote, icon: DollarSign, gradient: "from-green-500 to-emerald-600" },
               { quote: t.playQuote, icon: TrendingUp, gradient: "from-green-500 to-emerald-600" },
@@ -217,11 +217,11 @@ export default function LandingPage() {
                 viewport={{ once: true }}
               >
                 <div className="absolute inset-0 bg-white rounded-2xl blur-xl opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
-                <div className="relative bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg dark:shadow-gray-900/50 hover:shadow-xl dark:hover:shadow-gray-900/70 transition-all duration-300 hover:scale-105 border border-gray-100 dark:border-gray-800">
-                  <div className={`w-16 h-16 rounded-2xl bg-white dark:bg-white flex items-center justify-center mb-6 shadow-lg`}>
-                    <item.icon size={32} className="text-[#6099a5] dark:text-[#6099a5]" />
+                <div className="relative bg-white dark:bg-gray-900 p-5 sm:p-8 rounded-2xl shadow-lg dark:shadow-gray-900/50 hover:shadow-xl dark:hover:shadow-gray-900/70 transition-all duration-300 hover:scale-105 border border-gray-100 dark:border-gray-800">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-white flex items-center justify-center mb-4 sm:mb-6 shadow-lg`}>
+                    <item.icon size={28} className="text-[#6099a5] dark:text-[#6099a5]" />
                   </div>
-                  <p className="text-xl font-semibold text-[#333] dark:text-gray-200 leading-relaxed italic">
+                  <p className="text-base sm:text-xl font-semibold text-[#333] dark:text-gray-200 leading-relaxed italic">
                     "{item.quote}"
                   </p>
                 </div>
@@ -232,19 +232,19 @@ export default function LandingPage() {
       </section>
 
       {/* Services Section */}
-      <section className="py-24 px-4 bg-white dark:bg-black">
+      <section className="py-12 sm:py-24 px-4 bg-white dark:bg-black">
         <div className="container mx-auto">
           <motion.div
-            className="text-center mb-20"
+            className="text-center mb-12 sm:mb-20"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <motion.h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#333] dark:text-white">
+            <motion.h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-[#333] dark:text-white">
               {t.whatWeOffer}
             </motion.h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto">
               {t.comprehensiveTools}
             </p>
           </motion.div>
@@ -265,11 +265,11 @@ export default function LandingPage() {
                 viewport={{ once: true }}
               >
                 <div className="absolute inset-0 bg-white rounded-2xl blur-xl opacity-5 group-hover:opacity-15 transition-opacity duration-300"></div>
-                <div className="relative bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg dark:shadow-gray-900/50 hover:shadow-xl dark:hover:shadow-gray-900/70 transition-all duration-300 hover:scale-105 border border-gray-100 dark:border-gray-800">
-                  <div className={`w-16 h-16 rounded-2xl bg-white dark:bg-white flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <service.icon size={32} className="text-[#6099a5] dark:text-[#6099a5]" />
+                <div className="relative bg-white dark:bg-gray-900 p-5 sm:p-8 rounded-2xl shadow-lg dark:shadow-gray-900/50 hover:shadow-xl dark:hover:shadow-gray-900/70 transition-all duration-300 hover:scale-105 border border-gray-100 dark:border-gray-800">
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-white dark:bg-white flex items-center justify-center mb-4 sm:mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                    <service.icon size={28} className="text-[#6099a5] dark:text-[#6099a5]" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4 text-[#333] dark:text-gray-200">{service.title}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[#333] dark:text-gray-200">{service.title}</h3>
                   <p className="text-[#333] dark:text-gray-300 leading-relaxed">{service.desc}</p>
                 </div>
               </motion.div>
@@ -279,7 +279,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-[#042a32] to-[#051a1f] dark:from-[#031e24] dark:to-[#021317] relative overflow-hidden">
+      <section className="py-12 sm:py-24 px-4 bg-gradient-to-br from-[#042a32] to-[#051a1f] dark:from-[#031e24] dark:to-[#021317] relative overflow-hidden">
         {/* Background patterns */}
         <div className="absolute inset-0 opacity-15">
           <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-[#6099a5] to-[#084f5a] rounded-full blur-3xl"></div>
@@ -294,10 +294,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <motion.h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+            <motion.h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-6 text-white">
               {t.chooseYourPlan}
             </motion.h2>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-white/90 max-w-2xl mx-auto">
               {t.choosePerfectPlan}
             </p>
           </motion.div>
@@ -313,10 +313,10 @@ export default function LandingPage() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-[#6099a5] to-[#084f5a] rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
               <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden w-full hover:scale-105 transition-transform duration-300">
-                <div className="p-8 text-center">
-                  <div className="text-center mb-8">
-                    <h3 className="text-3xl font-bold mb-4 text-gray-800">{t.freePlan}</h3>
-                    <div className="text-5xl font-bold text-[#084f5a] mb-2">EGP 0</div>
+                <div className="p-6 sm:p-8 text-center">
+                  <div className="text-center mb-6 sm:mb-8">
+                    <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">{t.freePlan}</h3>
+                    <div className="text-4xl sm:text-5xl font-bold text-[#084f5a] mb-2">EGP 0</div>
                     <p className="text-gray-500 font-medium">{t.foreverFree}</p>
                   </div>
 
@@ -369,10 +369,10 @@ export default function LandingPage() {
                   </span>
                 </div>
 
-                <div className="p-8 text-center">
-                  <div className="text-center mb-8">
-                    <h3 className="text-3xl font-bold mb-4 text-gray-800">{t.premiumPlan}</h3>
-                    <div className="text-5xl font-bold text-[#084f5a] mb-2">EGP 90</div>
+                <div className="p-6 sm:p-8 text-center">
+                  <div className="text-center mb-6 sm:mb-8">
+                    <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">{t.premiumPlan}</h3>
+                    <div className="text-4xl sm:text-5xl font-bold text-[#084f5a] mb-2">EGP 90</div>
                     <p className="text-gray-500 font-medium">{t.perMonth}</p>
                   </div>
 
@@ -415,7 +415,7 @@ export default function LandingPage() {
       </section>
 
       {/* Team Section */}
-      <section className={`py-20 px-4 ${isDark ? "bg-[#1a1f21]" : "bg-white"}`}>
+      <section className={`py-12 sm:py-20 px-4 ${isDark ? "bg-[#1a1f21]" : "bg-white"}`}>
         <div className="container mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -424,7 +424,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <motion.h2 className={`text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-[#084f5a]"}`}>
+            <motion.h2 className={`text-2xl sm:text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-[#084f5a]"}`}>
               {t.meetOurTeam}
             </motion.h2>
           </motion.div>

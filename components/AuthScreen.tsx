@@ -150,7 +150,8 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
             displayName: tokenData.displayName || tokenData.name || email.split('@')[0],
             role: userRole,
             isPremium: tokenData.isPremium === 'true' || tokenData.isPremium === true || false,
-            createdAt: tokenData.createdAt || new Date().toISOString()
+            createdAt: tokenData.createdAt || new Date().toISOString(),
+            authMethod: "email"
           }
           setCurrentUser(userData)
           localStorage.setItem("cashcraft_user", JSON.stringify(userData))
@@ -168,7 +169,8 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
           displayName: email.split('@')[0],
           role: "user",
           isPremium: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          authMethod: "email"
         }
         setCurrentUser(userData)
         localStorage.setItem("cashcraft_user", JSON.stringify(userData))
@@ -301,7 +303,8 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
             displayName: tokenData.displayName || tokenData.name || tokenData.email.split('@')[0],
             role: userRole,
             isPremium: tokenData.isPremium === 'true' || tokenData.isPremium === true || false,
-            createdAt: tokenData.createdAt || new Date().toISOString()
+            createdAt: tokenData.createdAt || new Date().toISOString(),
+            authMethod: "google"
           }
           setCurrentUser(userData)
           localStorage.setItem("cashcraft_user", JSON.stringify(userData))
@@ -428,7 +431,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
       {/* Overlay for readability */}
       <div className="absolute inset-0 bg-black/50 dark:bg-black/60" aria-hidden />
 
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-6 sm:py-10">
         <div className="w-full max-w-4xl grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl">
           {/* Left: brand / pitch */}
           <div className="hidden md:flex flex-col justify-between bg-white/10 dark:bg-white/5 backdrop-blur-md p-8 text-white">
@@ -444,10 +447,10 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
           </div>
 
           {/* Right: auth card */}
-          <div className="bg-white dark:bg-gray-900 p-8">
+          <div className="bg-white dark:bg-gray-900 p-5 sm:p-8">
             {/* Toggle */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="text-2xl font-bold text-foreground">
+            <div className="flex items-center justify-between mb-5 sm:mb-8">
+              <div className="text-xl sm:text-2xl font-bold text-foreground">
                 {isLogin ? t.welcomeBack : t.createAccount}
               </div>
               <Button

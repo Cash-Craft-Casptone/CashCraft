@@ -160,9 +160,21 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="pt-2">
-                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    <span className="font-medium">{isAr ? "الدور:" : "Role:"}</span> {currentUser.role} &nbsp;|&nbsp;
-                    <span className="font-medium">{isAr ? "عضو منذ:" : "Member since:"}</span> {new Date(currentUser.createdAt).toLocaleDateString()}
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm text-gray-500 dark:text-gray-400 mb-4 space-y-2">
+                    <div>
+                      <span className="font-medium">{isAr ? "الدور:" : "Role:"}</span> {currentUser.role} &nbsp;|&nbsp;
+                      <span className="font-medium">{isAr ? "عضو منذ:" : "Member since:"}</span> {new Date(currentUser.createdAt).toLocaleDateString()}
+                    </div>
+                    {(currentUser as any).authMethod === "google" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-600 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <img src="/google-logo.png" alt="Google" className="w-3.5 h-3.5" />
+                        {isAr ? "تسجيل دخول بجوجل" : "Signed in with Google"}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700 rounded-full text-xs font-medium text-blue-700 dark:text-blue-400">
+                        ✉️ {isAr ? "تسجيل دخول بالبريد" : "Signed in with Email"}
+                      </span>
+                    )}
                   </div>
                   <Button onClick={handleSaveProfile} disabled={saving} className="bg-[#084f5a] hover:bg-[#063d47] text-white">
                     <Save className="w-4 h-4 mr-2" />
@@ -173,7 +185,8 @@ export default function SettingsPage() {
             </Card>
           </motion.div>
 
-          {/* Change Password */}
+          {/* Change Password - hidden for Google users */}
+          {(currentUser as any).authMethod !== "google" && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader>
@@ -214,6 +227,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </motion.div>
+          )}
 
           {/* Appearance */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
