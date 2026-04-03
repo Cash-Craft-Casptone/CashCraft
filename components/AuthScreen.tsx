@@ -480,6 +480,12 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                     <div>
                       <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">{t.password}</label>
                       <Input type="password" placeholder={t.enterPassword} className="bg-white dark:bg-gray-800" value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <div className="text-right mt-1">
+                        <button type="button" onClick={() => router.push("/forgot-password")}
+                          className="text-xs text-[#6099a5] hover:underline">
+                          {language === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
+                        </button>
+                      </div>
                     </div>
                     {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
                     <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleLogin} disabled={submitting}>
