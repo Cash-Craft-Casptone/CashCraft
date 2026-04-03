@@ -97,7 +97,8 @@ export default function ForgotPasswordPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, newPassword }),
       })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      // Accept 200 and 204 as success
+      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`)
       setStep("done")
     } catch (e: any) {
       setError(isAr ? "فشل إعادة تعيين كلمة المرور. تأكد من أن البريد الإلكتروني مسجل." : "Failed to reset password. Make sure the email is registered.")
