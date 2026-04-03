@@ -97,11 +97,13 @@ export default function ForgotPasswordPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, newPassword }),
       })
-      // Accept 200 and 204 as success
-      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`)
+      console.log("Reset password response status:", res.status)
+      const responseText = await res.text()
+      console.log("Reset password response body:", responseText)
+      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}: ${responseText}`)
       setStep("done")
     } catch (e: any) {
-      setError(isAr ? "فشل إعادة تعيين كلمة المرور. تأكد من أن البريد الإلكتروني مسجل." : "Failed to reset password. Make sure the email is registered.")
+      setError(e.message || (isAr ? "فشل إعادة تعيين كلمة المرور" : "Failed to reset password"))
     } finally {
       setLoading(false)
     }
