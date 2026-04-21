@@ -33,19 +33,19 @@ export function Navbar() {
     { key: "videos", href: "/videos" },
     { key: "quizes", href: "/quiz" },
     { key: "dashboard", href: "/dashboard" },
+    { label: "Feedback", href: "/feedback" },
   ]
 
   // Check if user is admin/editor
   const isAdminOrEditor = currentUser && (currentUser.role?.toLowerCase() === "admin" || currentUser.role?.toLowerCase() === "editor")
   
-  // If admin, redirect to admin pages and remove dashboard
-  // If regular user, keep dashboard and normal pages
   const displayNavItems = isAdminOrEditor 
     ? [
         { key: "home", href: "/" },
         { key: "articles", href: "/admin/articles" },
         { key: "videos", href: "/admin/videos" },
         { key: "quizes", href: "/admin/quizzes" },
+        { label: "Feedback", href: "/admin/feedback" },
       ]
     : navItems
 
@@ -75,12 +75,12 @@ export function Navbar() {
           <div className={`hidden md:flex items-center ${language === "ar" ? "space-x-12" : "space-x-8"}`}>
             {displayNavItems.map((item) => (
               <motion.div
-                key={item.key}
+                key={item.href}
                 onClick={() => router.push(item.href)}
                 className="transition-colors relative cursor-pointer text-muted-foreground hover:text-foreground"
                 whileHover={{ y: -2 }}
               >
-                {t[item.key as keyof typeof t]}
+                {'key' in item ? t[item.key as keyof typeof t] : item.label}
                 <motion.div
                   className="absolute bottom-0 left-0 h-0.5 bg-primary"
                   initial={{ width: 0 }}
@@ -197,7 +197,7 @@ export function Navbar() {
           <div className="flex flex-col space-y-4 py-4 border-t border-gray-200 dark:border-gray-800">
             {displayNavItems.map((item) => (
               <motion.div
-                key={item.key}
+                key={item.href}
                 onClick={() => {
                   router.push(item.href)
                   setIsMobileMenuOpen(false)
@@ -205,7 +205,7 @@ export function Navbar() {
                 className="text-center py-2 transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
                 whileHover={{ scale: 1.05 }}
               >
-                {t[item.key as keyof typeof t]}
+                {'key' in item ? t[item.key as keyof typeof t] : item.label}
               </motion.div>
             ))}
           </div>

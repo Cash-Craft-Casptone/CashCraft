@@ -677,3 +677,57 @@ export async function apiDeleteQuiz(id: string, token?: string) {
     token,
   })
 }
+
+// ===== FEEDBACK =====
+
+export interface FeedbackDto {
+  id: string
+  rating: number
+  message: string
+  category: string
+  createdAt: string
+  user?: { id: string; displayName: string; email: string; username: string }
+}
+
+export interface FeedbackSummary {
+  summary: {
+    total: number
+    avgRating: number
+    byRating: Array<{ stars: number; count: number }>
+    byCategory: Array<{ category: string; count: number }>
+  }
+  feedbacks: FeedbackDto[]
+}
+
+export async function apiSubmitFeedback(
+  rating: number,
+  message: string,
+  category: string,
+  token?: string
+) {
+  return request<{ message: string; id: string }>("feedback", {
+    method: "POST",
+    body: { rating, message, category },
+    token,
+  })
+}
+
+export async function apiGetMyFeedback(token?: string) {
+  return request<FeedbackDto[]>("feedback/mine", {
+    method: "GET",
+    token,
+  })
+}
+
+export async function apiGetAllFeedback(token?: string, category?: string, rating?: number) {
+  let endpoint = "feedback"
+  const params = new URLSearchParams()
+  if (category) params.append("category", category)
+  if (rating) params.append("rating", rating.toString())
+  if (params.toString()) endpoint += `?${params.toString()}`
+  return request<FeedbackSummary>(endpoint, { method: "GET", token })
+}
+
+export async function apiDeleteFeedback(id: string, token?: string) {
+  return request(`feedback/${id}`, { method: "DELETE", token })
+}

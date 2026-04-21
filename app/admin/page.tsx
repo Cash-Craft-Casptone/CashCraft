@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { useApp } from "@/contexts/AppContext"
 import { motion } from "framer-motion"
-import { BookOpen, Video, Brain, ArrowRight } from "lucide-react"
+import { BookOpen, Video, Brain, ArrowRight, MessageSquare } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminPage() {
@@ -48,6 +48,13 @@ export default function AdminPage() {
       icon: Brain,
       href: "/admin/quizzes",
       color: "from-purple-500 to-pink-600"
+    },
+    {
+      title: "User Feedback",
+      description: "View and manage user feedback and ratings",
+      icon: MessageSquare,
+      href: "/admin/feedback",
+      color: "from-orange-500 to-red-600"
     }
   ]
 
