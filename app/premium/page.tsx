@@ -48,8 +48,8 @@ export default function PremiumPage() {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      alert(isAr ? "شكراً! سيتم تفعيل اشتراكك قريباً." : "Thank you! Your subscription will be activated soon.")
-    }, 1500)
+      router.push(`/checkout?plan=${selected}&billing=${billing}`)
+    }, 300)
   }
 
   return (

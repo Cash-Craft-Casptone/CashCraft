@@ -358,7 +358,7 @@ export default function LandingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white rounded-xl" onClick={() => router.push("/premium")}>Get Silver</Button>
+                  <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white rounded-xl" onClick={() => router.push("/checkout?plan=silver&billing=monthly")}>Get Silver</Button>
                 </div>
               </div>
             </motion.div>
@@ -394,7 +394,7 @@ export default function LandingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full bg-yellow-400 hover:bg-yellow-300 text-[#084f5a] font-bold py-3 rounded-xl shadow-lg" onClick={() => router.push("/premium")}>{t.goPremium}</Button>
+                  <Button className="w-full bg-yellow-400 hover:bg-yellow-300 text-[#084f5a] font-bold py-3 rounded-xl shadow-lg" onClick={() => router.push("/checkout?plan=platinum&billing=monthly")}>{t.goPremium}</Button>
                 </div>
               </div>
             </motion.div>
