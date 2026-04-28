@@ -536,7 +536,7 @@ export default function QuizDetailPage() {
               <Button
                 onClick={handleSubmitQuiz}
                 disabled={selectedAnswers[currentQuestion] === undefined}
-                className="bg-gradient-to-r from-primary to-secondary"
+                className="bg-[#084f5a] hover:bg-[#063d47] text-white"
               >
                 <Trophy className="w-4 h-4 mr-2" />
                 {t.submitQuiz}

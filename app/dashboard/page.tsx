@@ -90,8 +90,19 @@ const defaultCategories = [
 const currencySymbols = {
   USD: "$",
   EUR: "€",
+  EGP: "EGP ",
+}
+
+// Arabic currency symbols (shown in Arabic mode)
+const currencySymbolsAr = {
+  USD: "$",
+  EUR: "€",
   EGP: "ج.م",
 }
+
+// Helper to get currency symbol based on language
+const getCurrencySymbol = (currency: "USD" | "EUR" | "EGP", lang: string) =>
+  lang === "ar" ? currencySymbolsAr[currency] : currencySymbols[currency]
 
 // Helper function to format numbers in English numerals regardless of language
 const formatNumber = (num: number) => {
@@ -1570,7 +1581,7 @@ export default function Dashboard() {
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{language === 'ar' ? 'الدخل' : 'Income'}</p>
                     <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">
-                      {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(incomeData.totalIncome)}` : <span className="text-xs text-gray-400">-</span>}
+                      {incomeData.totalIncome > 0 ? `${getCurrencySymbol(activePlan.currency, language)}${formatNumber(incomeData.totalIncome)}` : <span className="text-xs text-gray-400">-</span>}
                     </p>
                   </div>
                   <div className="p-1.5 sm:p-3 rounded-full bg-emerald-500 ml-1 flex-shrink-0">
@@ -1596,7 +1607,7 @@ export default function Dashboard() {
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{language === 'ar' ? 'صافي الراتب' : 'Net Salary'}</p>
                           <p className={`text-sm sm:text-2xl font-bold truncate ${isNegative ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
-                            {incomeData.totalIncome > 0 ? `${currencySymbols[activePlan.currency]}${formatNumber(netSalary)}` : <span className="text-xs text-gray-400">-</span>}
+                            {incomeData.totalIncome > 0 ? `${getCurrencySymbol(activePlan.currency, language)}${formatNumber(netSalary)}` : <span className="text-xs text-gray-400">-</span>}
                           </p>
                         </div>
                         <div className={`p-1.5 sm:p-3 rounded-full ml-1 flex-shrink-0 ${isNegative ? 'bg-red-500' : 'bg-blue-500'}`}>
@@ -1604,7 +1615,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="mt-1 sm:mt-4 text-xs text-gray-400 hidden sm:block">
-                        {incomeData.totalIncome > 0 ? `${language === 'ar' ? 'المصروف:' : 'Spent:'} ${currencySymbols[activePlan.currency]}${formatNumber(totalSpent)}` : ''}
+                        {incomeData.totalIncome > 0 ? `${language === 'ar' ? 'المصروف:' : 'Spent:'} ${getCurrencySymbol(activePlan.currency, language)}${formatNumber(totalSpent)}` : ''}
                       </div>
                     </>
                   )
@@ -1629,7 +1640,7 @@ export default function Dashboard() {
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{language === 'ar' ? 'المتبقي' : 'Remaining'}</p>
                           <p className={`text-sm sm:text-2xl font-bold truncate ${isOverspent ? 'text-red-500 dark:text-red-400' : 'text-[#084f5a] dark:text-emerald-400'}`}>
-                            {`${currencySymbols[activePlan.currency]}${formatNumber(remaining)}`}
+                            {`${getCurrencySymbol(activePlan.currency, language)}${formatNumber(remaining)}`}
                           </p>
                         </div>
                         <div className={`p-1.5 sm:p-3 rounded-full ml-1 flex-shrink-0 ${isOverspent ? 'bg-red-500' : 'bg-green-500'}`}>
@@ -1657,7 +1668,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{t.monthlyExpenses}</p>
-                    <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.categories.reduce((s, c) => s + c.spentAmount, 0))}`}</p>
+                    <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">{`${getCurrencySymbol(activePlan.currency, language)}${formatNumber(activePlan.categories.reduce((s, c) => s + c.spentAmount, 0))}`}</p>
                   </div>
                   <div className="p-1.5 sm:p-3 rounded-full bg-red-500 ml-1 flex-shrink-0">
                     <TrendingDown className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
@@ -1678,7 +1689,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{t.totalBalance}</p>
-                    <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">{`${currencySymbols[activePlan.currency]}${formatNumber(activePlan.totalBudget)}`}</p>
+                    <p className="text-sm sm:text-2xl font-bold text-[#084f5a] dark:text-emerald-400 truncate">{`${getCurrencySymbol(activePlan.currency, language)}${formatNumber(activePlan.totalBudget)}`}</p>
                   </div>
                   <div className="p-1.5 sm:p-3 rounded-full bg-purple-500 ml-1 flex-shrink-0">
                     <PieChart className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
@@ -1730,8 +1741,8 @@ export default function Dashboard() {
                             <div>
                               <h4 className="font-medium dark:text-gray-100">{translateCategoryName(category.name, language)}</h4>
                               <p className="text-sm text-gray-500 dark:text-gray-300">
-                                {currencySymbols[activePlan.currency]}
-                                {formatNumber(category.spentAmount)} of {currencySymbols[activePlan.currency]}
+                                {getCurrencySymbol(activePlan.currency, language)}
+                                {formatNumber(category.spentAmount)} of {getCurrencySymbol(activePlan.currency, language)}
                                 {formatNumber(category.budgetAmount)}
                               </p>
                             </div>
@@ -1741,7 +1752,7 @@ export default function Dashboard() {
                               {percentage.toFixed(1)}%
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-300">
-                              {currencySymbols[activePlan.currency]}
+                              {getCurrencySymbol(activePlan.currency, language)}
                               {formatNumber(category.budgetAmount - category.spentAmount)} {language === 'ar' ? 'متبقي' : 'left'}
                             </p>
                           </div>
@@ -1756,7 +1767,7 @@ export default function Dashboard() {
                         {isOverBudget && (
                           <div className="flex items-center gap-2 text-red-500 dark:text-red-400 text-sm">
                             <AlertCircle className="w-4 h-4" />
-                            {language === 'ar' ? 'تجاوز الميزانية بمقدار' : 'Over budget by'} {currencySymbols[activePlan.currency]}
+                            {language === 'ar' ? 'تجاوز الميزانية بمقدار' : 'Over budget by'} {getCurrencySymbol(activePlan.currency, language)}
                             {formatNumber(parseFloat((category.spentAmount - category.budgetAmount).toFixed(2)))}
                           </div>
                         )}
@@ -1828,7 +1839,7 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <p className="font-medium text-red-500 dark:text-red-400">
-                          -{currencySymbols[activePlan.currency]}
+                          -{getCurrencySymbol(activePlan.currency, language)}
                           {formatNumber(expense.amount)}
                         </p>
                       </motion.div>
@@ -1881,7 +1892,7 @@ export default function Dashboard() {
                           <div>
                             <h4 className="font-medium dark:text-gray-100">{translateCategoryName(category.name, language)}</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-300">
-                              {currencySymbols[activePlan.currency]}{formatNumber(category.budgetAmount)}
+                              {getCurrencySymbol(activePlan.currency, language)}{formatNumber(category.budgetAmount)}
                             </p>
                           </div>
                         </div>
@@ -2111,7 +2122,7 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="amount" className="text-base font-medium">Amount ({currencySymbols[activePlan.currency]})</Label>
+                <Label htmlFor="amount" className="text-base font-medium">Amount ({getCurrencySymbol(activePlan.currency, language)})</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -2154,16 +2165,16 @@ export default function Dashboard() {
                   <div className={`p-3 rounded-lg text-sm ${wouldExceed ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700' : 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700'}`}>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Plan Budget:</span>
-                      <span className="font-semibold">{currencySymbols[activePlan.currency]}{incomeData.totalIncome.toLocaleString()}</span>
+                      <span className="font-semibold">{getCurrencySymbol(activePlan.currency, language)}{incomeData.totalIncome.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between mt-1">
                       <span className="text-gray-600 dark:text-gray-400">Total Spent:</span>
-                      <span className="font-semibold">{currencySymbols[activePlan.currency]}{totalSpent.toLocaleString()}</span>
+                      <span className="font-semibold">{getCurrencySymbol(activePlan.currency, language)}{totalSpent.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between mt-1 border-t pt-1 dark:border-gray-600">
                       <span className="font-medium">Remaining:</span>
                       <span className={`font-bold ${wouldExceed ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {currencySymbols[activePlan.currency]}{remaining.toLocaleString()}
+                        {getCurrencySymbol(activePlan.currency, language)}{remaining.toLocaleString()}
                       </span>
                     </div>
                     {wouldExceed && <p className="text-red-600 dark:text-red-400 text-xs mt-1 font-medium">⚠️ This expense exceeds your remaining budget!</p>}
@@ -2238,7 +2249,7 @@ export default function Dashboard() {
                 />
               </div>
               <div>
-                <Label className="dark:text-gray-300">{language === 'ar' ? 'مبلغ الميزانية' : 'Budget Amount'} ({activePlan && currencySymbols[activePlan.currency]})</Label>
+                <Label className="dark:text-gray-300">{language === 'ar' ? 'مبلغ الميزانية' : 'Budget Amount'} ({activePlan && getCurrencySymbol(activePlan.currency, language)})</Label>
                 <Input
                   type="number"
                   min="0"
@@ -2303,3 +2314,4 @@ export default function Dashboard() {
     </div>
   )
 }
+
