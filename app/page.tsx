@@ -302,111 +302,99 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <motion.div className="flex justify-center gap-8 flex-wrap max-w-6xl mx-auto">
+          <motion.div className="flex justify-center gap-6 flex-wrap max-w-6xl mx-auto items-start">
             {/* Free Plan */}
             <motion.div
-              className="group relative w-full sm:w-80"
+              className="group relative w-full sm:w-72"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden w-full hover:scale-105 transition-transform duration-300">
+                <div className="p-6 sm:p-8 text-center">
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold mb-3 text-gray-800">{t.freePlan}</h3>
+                    <div className="text-4xl font-bold text-[#084f5a] mb-1">EGP 0</div>
+                    <p className="text-gray-500 font-medium text-sm">{t.foreverFree}</p>
+                  </div>
+                  <ul className="space-y-3 mb-6 text-left">
+                    {[t.basicExpenseTracking, t.simpleBudgetCreation, t.financialArticles, t.educationalVideos, t.basicFinancialQuiz].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3 h-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                        </div>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-xl" onClick={() => router.push("/register")}>{t.tryNow}</Button>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Silver Plan */}
+            <motion.div
+              className="group relative w-full sm:w-72"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#6099a5] to-[#084f5a] rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden w-full hover:scale-105 transition-transform duration-300">
+              <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden w-full hover:scale-105 transition-transform duration-300 border-2 border-[#6099a5]">
                 <div className="p-6 sm:p-8 text-center">
-                  <div className="text-center mb-6 sm:mb-8">
-                    <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">{t.freePlan}</h3>
-                    <div className="text-4xl sm:text-5xl font-bold text-[#084f5a] mb-2">EGP 0</div>
-                    <p className="text-gray-500 font-medium">{t.foreverFree}</p>
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold mb-3 text-gray-800">Silver</h3>
+                    <div className="text-4xl font-bold text-[#084f5a] mb-1">EGP 50</div>
+                    <p className="text-gray-500 font-medium text-sm">/ month</p>
                   </div>
-
-                  <ul className="space-y-4 mb-8">
-                  {[
-                    t.basicExpenseTracking,
-                    t.simpleBudgetCreation,
-                    t.financialArticles,
-                    t.educationalVideos,
-                    t.basicFinancialQuiz,
-                  ].map((feature, index) => (
-                      <li key={index} className="flex items-center space-x-3">
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                          </svg>
+                  <ul className="space-y-3 mb-6 text-left">
+                    {["No Ads on Videos", "Advanced Savings Challenges", "Priority Support"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                         </div>
-                        <span className="text-gray-700 font-medium">{feature}</span>
+                        {f}
                       </li>
                     ))}
                   </ul>
-
-                <Button
-                    className="w-full bg-gray-100 text-gray-800 hover:bg-gray-200 border-2 border-gray-300 py-4 text-lg font-semibold rounded-xl transition-all duration-300 transform hover:scale-105"
-                  onClick={() => router.push("/register")}
-                >
-                  {t.tryNow}
-                </Button>
+                  <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white rounded-xl" onClick={() => router.push("/premium")}>Get Silver</Button>
                 </div>
               </div>
             </motion.div>
 
-            {/* Premium Plan */}
+            {/* Platinum Plan - DECOY: most prominent */}
             <motion.div
               className="group relative w-full sm:w-80"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#6099a5] to-[#084f5a] rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden w-full hover:scale-105 transition-transform duration-300 border-2 border-[#084f5a]">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#6099a5] to-[#084f5a] rounded-3xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
+              <div className="relative bg-gradient-to-br from-[#084f5a] to-[#0a6b7a] rounded-3xl shadow-2xl overflow-hidden w-full scale-105 border-2 border-yellow-400">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-                  {t.bestValue}
+                  <span className="bg-yellow-400 text-[#084f5a] px-5 py-1.5 rounded-full text-sm font-bold shadow-lg flex items-center gap-1">
+                    ⭐ {t.bestValue}
                   </span>
                 </div>
-
-                <div className="p-6 sm:p-8 text-center">
-                  <div className="text-center mb-6 sm:mb-8">
-                    <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">{t.premiumPlan}</h3>
-                    <div className="text-4xl sm:text-5xl font-bold text-[#084f5a] mb-2">EGP 90</div>
-                    <p className="text-gray-500 font-medium">{t.perMonth}</p>
+                <div className="p-6 sm:p-8 text-center pt-10">
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold mb-3 text-white">Platinum</h3>
+                    <div className="text-4xl font-bold text-yellow-300 mb-1">EGP 70</div>
+                    <p className="text-white/70 font-medium text-sm">/ month</p>
                   </div>
-
-                  <ul className="space-y-4 mb-8">
-                  {[
-                    t.advancedSavingsChallenges,
-                    t.aiPoweredFinancialInsights,
-                    t.personalizedFinancialCoaching,
-                    t.exclusiveEducationalContent,
-                    t.investmentSimulators,
-                    t.priorityCustomerSupport,
-                    t.advancedBudgetingTools,
-                  ].map((feature, index) => (
-                      <li key={index} className="flex items-center space-x-3">
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                          </svg>
+                  <ul className="space-y-3 mb-6 text-left">
+                    {["No Ads on Videos", "Advanced Savings Challenges", "Priority Support", "AI Financial Insights", "Investment Simulators", "Exclusive Content"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${i < 3 ? "bg-white/20" : "bg-yellow-400/30"}`}>
+                          <svg className={`w-3 h-3 ${i < 3 ? "text-white" : "text-yellow-300"}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                         </div>
-                        <span className="text-gray-700 font-semibold">{feature}</span>
+                        <span className={i < 3 ? "text-white/80" : "text-white font-semibold"}>{f}</span>
                       </li>
                     ))}
                   </ul>
-
-                <Button
-                    className="w-full bg-[#084f5a] text-white hover:bg-[#6099a5] py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                  onClick={() => router.push("/premium")}
-                >
-                  {t.goPremium}
-                </Button>
+                  <Button className="w-full bg-yellow-400 hover:bg-yellow-300 text-[#084f5a] font-bold py-3 rounded-xl shadow-lg" onClick={() => router.push("/premium")}>{t.goPremium}</Button>
                 </div>
               </div>
             </motion.div>
