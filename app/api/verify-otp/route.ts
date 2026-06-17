@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { otpStore } from "../send-otp/route"
+import { otpStore } from "@/lib/otp-store"
 
 export async function POST(req: NextRequest) {
   try {

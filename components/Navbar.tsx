@@ -1,33 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { motion, useScroll } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Moon, Sun, Globe, Menu, X, User, LogOut, Settings } from "lucide-react"
-import { useApp } from "@/contexts/AppContext"
-import { translations } from "@/lib/translations"
+import { Globe, LogOut, Menu, Moon, Settings, Sun, User, WalletCards, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+import { Button } from "@/components/ui/button"
+import { useApp } from "@/contexts/AppContext"
+import { translations } from "@/lib/translations"
 
 export function Navbar() {
-  const { language, setLanguage, isDark, setIsDark, currentUser, setCurrentUser, refreshUser } = useApp()
+  const { language, setLanguage, isDark, setIsDark, currentUser, refreshUser } = useApp()
   const router = useRouter()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { scrollY } = useScroll()
-
   const t = translations[language]
 
   useEffect(() => {
-    const unsubscribe = scrollY.onChange((latest) => {
-      setIsScrolled(latest > 50)
-    })
+    const unsubscribe = scrollY.onChange((latest) => setIsScrolled(latest > 50))
     return unsubscribe
   }, [scrollY])
 
-
-
-  const navItems = [
+  const userNavItems = [
     { key: "home", href: "/" },
     { key: "articles", href: "/articles" },
     { key: "videos", href: "/videos" },
@@ -36,116 +31,97 @@ export function Navbar() {
     { label: "Feedback", href: "/feedback" },
   ]
 
-  // Check if user is admin/editor
-  const isAdminOrEditor = currentUser && (currentUser.role?.toLowerCase() === "admin" || currentUser.role?.toLowerCase() === "editor")
-  
-  const displayNavItems = isAdminOrEditor 
-    ? [
-        { key: "home", href: "/" },
-        { key: "articles", href: "/admin/articles" },
-        { key: "videos", href: "/admin/videos" },
-        { key: "quizes", href: "/admin/quizzes" },
-        { label: "Feedback", href: "/admin/feedback" },
-      ]
-    : navItems
+  const adminNavItems = [
+    { key: "home", href: "/" },
+    { key: "articles", href: "/admin/articles" },
+    { key: "videos", href: "/admin/videos" },
+    { key: "quizes", href: "/admin/quizzes" },
+    { label: "Feedback", href: "/admin/feedback" },
+  ]
+
+  const isAdminOrEditor =
+    currentUser &&
+    (currentUser.role?.toLowerCase() === "admin" || currentUser.role?.toLowerCase() === "editor")
+  const displayNavItems = isAdminOrEditor ? adminNavItems : userNavItems
+
+  const navLabel = (item: (typeof userNavItems)[number]) =>
+    "key" in item ? t[item.key as keyof typeof t] : item.label
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-background/95 backdrop-blur-md shadow-sm py-3 px-4 border-b border-border ${
-        language === "ar" ? "rtl" : "ltr"
-      }`}
+      className={`fixed left-0 right-0 top-0 z-50 px-3 transition-all duration-300 sm:px-4 ${
+        isScrolled ? "py-2" : "py-3"
+      } ${language === "ar" ? "rtl" : "ltr"}`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.45 }}
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <motion.div
-            className={`text-xl font-bold text-primary cursor-pointer hover:opacity-90 transition-opacity ${
-              language === 'ar' ? 'font-tajawal text-2xl' : ''
+      <div className="cc-container">
+        <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-background/85 px-3 py-2 shadow-[0_16px_50px_rgba(9,47,63,0.12)] backdrop-blur-xl dark:bg-background/75">
+          <motion.button
+            type="button"
+            className={`flex items-center gap-2 text-lg font-extrabold text-foreground transition-opacity hover:opacity-90 ${
+              language === "ar" ? "font-tajawal text-2xl" : ""
             }`}
             whileHover={{ scale: 1.02 }}
             onClick={() => router.push("/")}
           >
-            {language === 'ar' ? 'كاش كرافت' : 'CashCraft'}
-          </motion.div>
+            <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_10px_25px_rgba(19,124,135,0.24)]">
+              <WalletCards className="size-5" />
+            </span>
+            <span>{language === "ar" ? "كاش كرافت" : "CashCraft"}</span>
+          </motion.button>
 
-          {/* Desktop Navigation */}
-          <div className={`hidden md:flex items-center ${language === "ar" ? "space-x-12" : "space-x-8"}`}>
+          <div className="hidden items-center rounded-full border border-border/60 bg-card/70 p-1 text-sm shadow-sm md:flex">
             {displayNavItems.map((item) => (
-              <motion.div
+              <motion.button
+                type="button"
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className="transition-colors relative cursor-pointer text-muted-foreground hover:text-foreground"
+                className="relative rounded-full px-3 py-2 font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                 whileHover={{ y: -2 }}
               >
-                {'key' in item ? t[item.key as keyof typeof t] : item.label}
-                <motion.div
-                  className="absolute bottom-0 left-0 h-0.5 bg-primary"
-                  initial={{ width: 0 }}
-                  whileHover={{ width: "100%" }}
-                  transition={{ duration: 0.3 }}
-                />
-              </motion.div>
+                {navLabel(item)}
+              </motion.button>
             ))}
           </div>
 
-          {/* Controls */}
           <div className={`flex items-center gap-2 ${language === "ar" ? "flex-row-reverse" : ""}`}>
-            {/* Language Toggle */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-              className="bg-[#6B9FAD] text-white border-[#6B9FAD] hover:bg-[#5A8A98] dark:bg-[#6B9FAD] dark:border-[#6B9FAD] dark:hover:bg-[#5A8A98] hidden sm:flex"
+              className="hidden sm:flex"
             >
-              <Globe className="w-4 h-4 mr-1" />
+              <Globe className="w-4 h-4" />
               {language === "en" ? "العربية" : "English"}
             </Button>
-            {/* Language icon-only on mobile */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-              className="bg-[#6B9FAD] text-white border-[#6B9FAD] hover:bg-[#5A8A98] sm:hidden"
+              className="sm:hidden"
             >
               <Globe className="w-4 h-4" />
             </Button>
 
-            {/* Theme Toggle */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDark(!isDark)}
-              className="bg-[#6B9FAD] text-white border-[#6B9FAD] hover:bg-[#5A8A98] dark:bg-[#6B9FAD] dark:border-[#6B9FAD] dark:hover:bg-[#5A8A98]"
-            >
+            <Button variant="outline" size="sm" onClick={() => setIsDark(!isDark)}>
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
 
-            {/* User/Login Button */}
             {currentUser ? (
               <div className="flex items-center gap-1">
                 <Button
                   onClick={() => router.push("/dashboard")}
-                  className="bg-[#6B9FAD] hover:bg-[#5A8A98] text-white dark:bg-[#6B9FAD] dark:hover:bg-[#5A8A98] hidden sm:flex"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  {currentUser.displayName}
-                </Button>
-                <Button
-                  onClick={() => router.push("/dashboard")}
-                  className="bg-[#6B9FAD] hover:bg-[#5A8A98] text-white sm:hidden"
-                  size="sm"
+                  className="hidden max-w-44 truncate sm:flex"
                 >
                   <User className="w-4 h-4" />
+                  {currentUser.displayName}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push("/settings")}
-                  className="border-[#6B9FAD] text-[#6B9FAD] hover:bg-[#6B9FAD] hover:text-white dark:border-[#6B9FAD] dark:text-[#6B9FAD] dark:hover:bg-[#6B9FAD] dark:hover:text-white"
-                >
+                <Button onClick={() => router.push("/dashboard")} className="sm:hidden" size="sm">
+                  <User className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => router.push("/settings")}>
                   <Settings className="w-4 h-4" />
                 </Button>
                 <Button
@@ -157,22 +133,16 @@ export function Navbar() {
                     await refreshUser()
                     router.push("/")
                   }}
-                  className="border-[#6B9FAD] text-[#6B9FAD] hover:bg-[#6B9FAD] hover:text-white dark:border-[#6B9FAD] dark:text-[#6B9FAD] dark:hover:bg-[#6B9FAD] dark:hover:text-white"
                 >
                   <LogOut className="w-4 h-4" />
                 </Button>
               </div>
             ) : (
-              <Button
-                onClick={() => router.push("/login")}
-                className="bg-[#6B9FAD] hover:bg-[#5A8A98] text-white dark:bg-[#6B9FAD] dark:hover:bg-[#5A8A98]"
-                size="sm"
-              >
+              <Button onClick={() => router.push("/login")} size="sm">
                 {t.login}
               </Button>
             )}
 
-            {/* Mobile Menu Toggle */}
             <Button
               variant="ghost"
               size="sm"
@@ -184,29 +154,29 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         <motion.div
-          className={`md:hidden mt-4 ${isMobileMenuOpen ? "block" : "hidden"}`}
+          className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`}
           initial={{ opacity: 0, height: 0 }}
           animate={{
             opacity: isMobileMenuOpen ? 1 : 0,
             height: isMobileMenuOpen ? "auto" : 0,
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
         >
-          <div className="flex flex-col space-y-4 py-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="mt-3 flex flex-col gap-1 rounded-2xl border border-border/70 bg-card/95 p-2 shadow-lg backdrop-blur-xl">
             {displayNavItems.map((item) => (
-              <motion.div
+              <motion.button
+                type="button"
                 key={item.href}
                 onClick={() => {
                   router.push(item.href)
                   setIsMobileMenuOpen(false)
                 }}
-                className="text-center py-2 transition-colors cursor-pointer text-muted-foreground hover:text-foreground"
-                whileHover={{ scale: 1.05 }}
+                className="cursor-pointer rounded-xl px-4 py-3 text-center font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                whileHover={{ scale: 1.02 }}
               >
-                {'key' in item ? t[item.key as keyof typeof t] : item.label}
-              </motion.div>
+                {navLabel(item)}
+              </motion.button>
             ))}
           </div>
         </motion.div>

@@ -356,9 +356,9 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
         <div className="absolute inset-0 bg-black/50 dark:bg-black/60" aria-hidden />
 
         <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10">
-          <div className="w-full max-w-4xl grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="grid w-full max-w-4xl overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.32)] backdrop-blur md:grid-cols-2">
             {/* Left: brand / pitch */}
-            <div className="hidden md:flex flex-col justify-between bg-white/10 dark:bg-white/5 backdrop-blur-md p-8 text-white">
+            <div className="hidden flex-col justify-between bg-white/12 p-8 text-white backdrop-blur-md md:flex">
               <div>
                 <h1 className="text-3xl font-bold mb-2">CashCraft</h1>
                 <p className="text-white/90">
@@ -371,7 +371,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
             </div>
 
             {/* Right: user info card */}
-            <div className="bg-white dark:bg-gray-900 p-8">
+            <div className="bg-card/95 p-8 text-card-foreground backdrop-blur">
               <div className="text-center space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold text-foreground mb-2">
@@ -432,22 +432,23 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
       <div className="absolute inset-0 bg-black/50 dark:bg-black/60" aria-hidden />
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-6 sm:py-10">
-        <div className="w-full max-w-4xl grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="grid w-full max-w-4xl overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.32)] backdrop-blur md:grid-cols-2">
           {/* Left: brand / pitch */}
-          <div className="hidden md:flex flex-col justify-between bg-white/10 dark:bg-white/5 backdrop-blur-md p-8 text-white">
+          <div className="hidden flex-col justify-between bg-white/12 p-8 text-white backdrop-blur-md md:flex">
             <div>
-              <h1 className="text-3xl font-bold mb-2">CashCraft</h1>
-              <p className="text-white/90">
+              <div className="cc-kicker mb-5 border-white/20 bg-white/15 text-white">CashCraft</div>
+              <h1 className="mb-3 text-4xl font-extrabold leading-tight">Smart money habits start here.</h1>
+              <p className="text-white/85">
                 {t.smartMoneyDesc}
               </p>
             </div>
-            <div className="text-sm text-white/80">
+            <div className="rounded-xl border border-white/15 bg-white/10 p-4 text-sm text-white/80">
               {t.chooseYourPlan}
             </div>
           </div>
 
           {/* Right: auth card */}
-          <div className="bg-white dark:bg-gray-900 p-5 sm:p-8">
+          <div className="bg-card/95 p-5 text-card-foreground backdrop-blur sm:p-8">
             {/* Toggle */}
             <div className="flex items-center justify-between mb-5 sm:mb-8">
               <div className="text-xl sm:text-2xl font-bold text-foreground">
@@ -455,7 +456,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
               </div>
               <Button
                 variant="outline"
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                className="shrink-0"
                 onClick={() => { setMode(isLogin ? "register" : "login"); setOtpStep("form"); setError(null) }}
               >
                 {isLogin ? t.createNewAccount : t.signInHere}
@@ -475,20 +476,20 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                   >
                     <div>
                       <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">{t.email}</label>
-                      <Input type="email" placeholder={t.enterEmail} className="bg-white dark:bg-gray-800" value={email} onChange={(e) => setEmail(e.target.value)} />
+                      <Input type="email" placeholder={t.enterEmail} value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <div>
                       <label className="block text-sm mb-2 text-gray-700 dark:text-gray-300">{t.password}</label>
-                      <Input type="password" placeholder={t.enterPassword} className="bg-white dark:bg-gray-800" value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <Input type="password" placeholder={t.enterPassword} value={password} onChange={(e) => setPassword(e.target.value)} />
                       <div className="text-right mt-1">
                         <button type="button" onClick={() => router.push("/forgot-password")}
-                          className="text-xs text-[#6099a5] hover:underline">
+                          className="text-xs font-semibold text-primary hover:underline">
                           {language === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
                         </button>
                       </div>
                     </div>
                     {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
-                    <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleLogin} disabled={submitting}>
+                    <Button className="w-full" onClick={handleLogin} disabled={submitting}>
                       {t.signIn}
                     </Button>
                     
@@ -497,7 +498,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                         <span className="w-full border-t border-gray-300 dark:border-gray-600" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">{t.orContinueWith}</span>
+                        <span className="bg-card px-2 text-muted-foreground">{t.orContinueWith}</span>
                       </div>
                     </div>
                     
@@ -514,7 +515,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                     </div>
                     
                     <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                      {t.dontHaveAccount} <button className="text-[#6099a5]" onClick={() => setMode("register")}>{t.createNewAccount}</button>
+                      {t.dontHaveAccount} <button className="font-semibold text-primary" onClick={() => setMode("register")}>{t.createNewAccount}</button>
                     </div>
                   </motion.div>
                 ) : (
@@ -530,40 +531,40 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                       <>
                         <div>
                           <label className="block text-sm mb-2 text-foreground">{t.email}</label>
-                          <Input type="email" placeholder={t.enterEmail} className="bg-background" value={email} onChange={(e) => setEmail(e.target.value)} />
+                          <Input type="email" placeholder={t.enterEmail} value={email} onChange={(e) => setEmail(e.target.value)} />
                         </div>
                         <div>
                           <label className="block text-sm mb-2 text-foreground">{t.username}</label>
-                          <Input type="text" placeholder={t.enterUsername} className="bg-background" value={username} onChange={(e) => setUsername(e.target.value)} />
+                          <Input type="text" placeholder={t.enterUsername} value={username} onChange={(e) => setUsername(e.target.value)} />
                         </div>
                         <div>
                           <label className="block text-sm mb-2 text-foreground">{t.displayName}</label>
-                          <Input type="text" placeholder={t.enterDisplayName} className="bg-background" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+                          <Input type="text" placeholder={t.enterDisplayName} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
                         </div>
                         <div>
                           <label className="block text-sm mb-2 text-foreground">{t.phoneNumber}</label>
-                          <Input type="tel" placeholder={t.enterPhoneNumber} className="bg-background" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                          <Input type="tel" placeholder={t.enterPhoneNumber} value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
                         </div>
                         <div>
                           <label className="block text-sm mb-2 text-foreground">{t.password}</label>
-                          <Input type="password" placeholder={t.enterPassword} className="bg-background" value={password} onChange={(e) => setPassword(e.target.value)} />
+                          <Input type="password" placeholder={t.enterPassword} value={password} onChange={(e) => setPassword(e.target.value)} />
                         </div>
                         <div>
                           <label className="block text-sm mb-2 text-foreground">{t.confirmPassword}</label>
-                          <Input type="password" placeholder={t.enterConfirmPassword} className="bg-background" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                          <Input type="password" placeholder={t.enterConfirmPassword} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                         </div>
                         {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
-                        <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleSendOTP} disabled={otpSending}>
+                        <Button className="w-full" onClick={handleSendOTP} disabled={otpSending}>
                           {otpSending ? "Sending code..." : "Send Verification Code"}
                         </Button>
                       </>
                     ) : (
                       <>
-                        <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                        <div className="rounded-xl border border-primary/20 bg-primary/10 p-4 text-center">
                           <p className="text-sm text-gray-600 dark:text-gray-300">
                             A 6-digit verification code was sent to
                           </p>
-                          <p className="font-semibold text-[#084f5a] dark:text-emerald-400 mt-1">{email}</p>
+                          <p className="mt-1 font-semibold text-primary">{email}</p>
                         </div>
                         <div>
                           <label className="block text-sm mb-2 text-foreground">Verification Code</label>
@@ -572,13 +573,13 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                             inputMode="numeric"
                             maxLength={6}
                             placeholder="Enter 6-digit code"
-                            className="bg-background text-center text-2xl tracking-widest font-bold"
+                            className="text-center text-2xl font-bold tracking-widest"
                             value={otpCode}
                             onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                           />
                         </div>
                         {error && <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>}
-                        <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white" onClick={handleVerifyAndRegister} disabled={submitting || otpCode.length !== 6}>
+                        <Button className="w-full" onClick={handleVerifyAndRegister} disabled={submitting || otpCode.length !== 6}>
                           {submitting ? "Creating account..." : "Verify & Create Account"}
                         </Button>
                         <div className="flex items-center justify-between text-sm">
@@ -586,7 +587,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                             ← Change email
                           </button>
                           <button
-                            className={`text-[#6099a5] ${otpCooldown > 0 ? "opacity-50 cursor-not-allowed" : "hover:underline"}`}
+                            className={`font-semibold text-primary ${otpCooldown > 0 ? "opacity-50 cursor-not-allowed" : "hover:underline"}`}
                             onClick={otpCooldown > 0 ? undefined : handleSendOTP}
                             disabled={otpCooldown > 0 || otpSending}
                           >
@@ -601,7 +602,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                         <span className="w-full border-t border-gray-300 dark:border-gray-600" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">{t.orContinueWith}</span>
+                        <span className="bg-card px-2 text-muted-foreground">{t.orContinueWith}</span>
                       </div>
                     </div>
                     
@@ -617,7 +618,7 @@ export function AuthScreen({ initialMode, wallpaperUrl = "/auth-wallpaper.jpg", 
                     </div>
                     
                     <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                      {t.alreadyHaveAccount} <button className="text-[#6099a5]" onClick={() => { setMode("login"); setOtpStep("form"); setError(null) }}>{t.signInHere}</button>
+                      {t.alreadyHaveAccount} <button className="font-semibold text-primary" onClick={() => { setMode("login"); setOtpStep("form"); setError(null) }}>{t.signInHere}</button>
                     </div>
                   </motion.div>
                 )}

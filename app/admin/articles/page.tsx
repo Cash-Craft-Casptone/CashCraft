@@ -347,7 +347,7 @@ export default function AdminArticlesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow border-2 border-emerald-100 dark:border-emerald-900"
+              className="cc-card overflow-hidden border-2 border-emerald-100 dark:border-emerald-900"
             >
               <div className="relative">
                 {article.coverUrl && (

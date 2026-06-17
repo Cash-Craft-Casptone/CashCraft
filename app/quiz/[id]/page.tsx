@@ -74,6 +74,23 @@ const translations = {
   },
 }
 
+type QuizQuestion = {
+  id: number
+  question: string
+  options: string[]
+  correctAnswer: number
+  explanation: string
+}
+
+type QuizState = {
+  title: string
+  description: string
+  category: string
+  difficulty: string
+  timeLimit: number
+  questions: QuizQuestion[]
+}
+
 // Mock quiz data
 const mockQuizData = {
   1: {
@@ -148,7 +165,7 @@ export default function QuizDetailPage() {
   const [timeRemaining, setTimeRemaining] = useState(0)
   const [quizStartTime, setQuizStartTime] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [quiz, setQuiz] = useState<any>(null)
+  const [quiz, setQuiz] = useState<QuizState | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const t = translations[currentLang]
@@ -214,6 +231,7 @@ export default function QuizDetailPage() {
   }
 
   const handleNextQuestion = () => {
+    if (!quiz) return
     if (currentQuestion < quiz.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
     }
@@ -237,8 +255,9 @@ export default function QuizDetailPage() {
   }
 
   const calculateScore = () => {
+    if (!quiz) return 0
     let correct = 0
-    quiz.questions.forEach((question, index) => {
+    quiz.questions.forEach((question: QuizQuestion, index: number) => {
       if (selectedAnswers[index] === question.correctAnswer) {
         correct++
       }
@@ -296,7 +315,7 @@ export default function QuizDetailPage() {
   if (showResults) {
     const score = calculateScore()
     const correctAnswers = quiz.questions.filter(
-      (_, index) => selectedAnswers[index] === quiz.questions[index].correctAnswer,
+      (_: QuizQuestion, index: number) => selectedAnswers[index] === quiz.questions[index].correctAnswer,
     ).length
 
     return (
@@ -369,7 +388,7 @@ export default function QuizDetailPage() {
             {/* Detailed Results */}
             <div className="space-y-4">
               <h3 className={`text-xl font-bold ${currentLang === "ar" ? "font-cairo" : ""}`}>Detailed Results</h3>
-              {quiz.questions.map((question, index) => {
+              {quiz.questions.map((question: QuizQuestion, index: number) => {
                 const userAnswer = selectedAnswers[index]
                 const isCorrect = userAnswer === question.correctAnswer
 
@@ -499,7 +518,7 @@ export default function QuizDetailPage() {
                     onValueChange={(value) => handleAnswerSelect(currentQuestion, Number.parseInt(value))}
                     className="space-y-4"
                   >
-                    {currentQ.options.map((option, index) => (
+                    {currentQ.options.map((option: string, index: number) => (
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, y: 10 }}

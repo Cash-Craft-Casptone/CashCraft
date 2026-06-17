@@ -79,17 +79,18 @@ export default function ArticlesPage() {
   )
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+    <div className={`cc-page-shell ${language === "ar" ? "rtl" : "ltr"}`}>
       <Navbar />
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-8">
+      <div className="cc-container px-3 pb-10 pt-24 sm:px-6 sm:pt-32 lg:px-8">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-5 sm:mb-12">
-          <h1 className="text-2xl sm:text-4xl font-bold text-[#084f5a] dark:text-white mb-2 sm:mb-4">{t.educationalArticles}</h1>
-          <p className="text-sm sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto hidden sm:block">{t.educationalArticlesDesc}</p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="cc-page-header mb-5 text-center sm:mb-8">
+          <span className="cc-kicker mb-4">{language === "ar" ? "تعلم" : "Learn"}</span>
+          <h1 className="mb-2 text-3xl font-extrabold text-foreground sm:mb-4 sm:text-5xl">{t.educationalArticles}</h1>
+          <p className="mx-auto hidden max-w-3xl text-sm text-muted-foreground sm:block sm:text-xl">{t.educationalArticlesDesc}</p>
         </motion.div>
 
         {/* Search and Filter */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-4 sm:mb-8 space-y-2 sm:space-y-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="cc-toolbar mb-4 space-y-2 p-3 sm:mb-8 sm:space-y-4 sm:p-4">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -112,7 +113,7 @@ export default function ArticlesPage() {
             const isRead = readArticles.includes(article.id)
             return (
               <motion.div key={article.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
-                className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all cursor-pointer ${isRead ? "border-2 border-green-200 dark:border-green-800" : ""}`}
+                className={`cc-card cursor-pointer overflow-hidden ${isRead ? "border-2 border-green-200 dark:border-green-800" : ""}`}
                 onClick={() => markAsRead(article.id)}>
                 <div className="relative">
                   {article.coverUrl ? (
@@ -124,7 +125,7 @@ export default function ArticlesPage() {
                     <BookOpen className="w-8 sm:w-16 h-8 sm:h-16 text-white opacity-60" />
                   </div>
                   <button onClick={e => { e.stopPropagation(); toggleBookmark(article.id) }}
-                    className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full">
+                    className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 shadow-sm backdrop-blur dark:bg-gray-800/90">
                     {bookmarkedArticles.includes(article.id)
                       ? <BookmarkCheck className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-teal-600" />
                       : <Bookmark className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />}
@@ -138,7 +139,7 @@ export default function ArticlesPage() {
                     {language === "ar" ? article.descriptionAr : article.descriptionEn}
                   </p>
                   <Link href={`/articles/${article.id}`} onClick={e => e.stopPropagation()}>
-                    <Button size="sm" className="bg-[#6099a5] hover:bg-[#084f5a] text-white w-full text-xs h-7 sm:h-9 sm:text-sm">
+                  <Button size="sm" className="h-8 w-full text-xs sm:h-9 sm:text-sm">
                       {isRead ? (language === "ar" ? "إعادة" : "Reread") : t.readMore}
                     </Button>
                   </Link>

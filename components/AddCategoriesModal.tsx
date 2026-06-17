@@ -154,9 +154,9 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
             className="w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl overflow-hidden">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_30px_90px_rgba(0,0,0,0.24)]">
               {/* Header */}
-              <div style={{ backgroundColor: "#14b8a6" }} className="text-white p-6">
+              <div className="cc-dark-panel p-6 text-white">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-semibold">{translations.title}</h2>
@@ -174,7 +174,7 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
               <div className="p-6 space-y-6">
                 {/* Quick Add */}
                 <div className="space-y-3">
-                  <Label className="text-lg font-semibold">{translations.quickAdd}</Label>
+                  <Label className="text-lg font-bold">{translations.quickAdd}</Label>
                   <div className="flex flex-wrap gap-2">
                     {predefinedCategories.map((predefined, index) => {
                       const name = language === 'ar' ? predefined.nameAr : predefined.nameEn
@@ -186,7 +186,7 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                           size="sm"
                           onClick={() => addPredefinedCategory(predefined)}
                           disabled={alreadyAdded}
-                          className={`flex items-center gap-2 ${alreadyAdded ? 'opacity-40 cursor-not-allowed' : 'border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-emerald-950'}`}
+                          className={`flex items-center gap-2 ${alreadyAdded ? 'cursor-not-allowed opacity-40' : ''}`}
                         >
                           <predefined.icon className="w-4 h-4" />
                           {name}
@@ -199,8 +199,8 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                 {/* Categories List */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-lg font-semibold">{translations.yourCategories}</Label>
-                    <Button onClick={addCategory} className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700">
+                    <Label className="text-lg font-bold">{translations.yourCategories}</Label>
+                    <Button onClick={addCategory}>
                       <Plus className="w-4 h-4 mr-2" />
                       {translations.addCategory}
                     </Button>
@@ -218,7 +218,7 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                           key={index}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="flex items-center gap-3 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700"
+                          className="flex items-center gap-3 rounded-xl border border-border bg-background/70 p-4"
                         >
                           <div
                             className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-600 shadow-md flex items-center justify-center"
@@ -281,14 +281,13 @@ export function AddCategoriesModal({ isOpen, onClose, onSave, planName, totalBud
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
+                <div className="flex justify-end gap-3 border-t border-border pt-4">
                   <Button variant="outline" onClick={onClose} className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
                     {translations.cancel}
                   </Button>
                   <Button
                     onClick={handleSave}
                     disabled={categories.length === 0 || isOverLimit}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
                   >
                     {translations.save}
                   </Button>

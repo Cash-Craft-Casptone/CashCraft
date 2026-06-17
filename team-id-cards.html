@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CashCraft Team ID Cards</title>
+  <style>
+    :root {
+      --navy: #092f3f;
+      --teal: #137c87;
+      --mint: #2fbf9a;
+      --gold: #f3b84c;
+      --rose: #e26975;
+      --ink: #17202e;
+      --muted: #617180;
+      --paper: #f7fbfb;
+      --line: #d9e7e8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(19, 124, 135, 0.08), transparent 32%),
+        linear-gradient(120deg, rgba(47, 191, 154, 0.08), rgba(243, 184, 76, 0.08) 54%, transparent 82%),
+        #eef6f6;
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    .page {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .intro {
+      margin: 0 0 24px;
+    }
+
+    .intro h1 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .intro p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, max-content));
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      position: relative;
+      width: 85.6mm;
+      height: 53.98mm;
+      overflow: hidden;
+      border: 1px solid rgba(9, 47, 63, 0.16);
+      border-radius: 5.2mm;
+      background:
+        linear-gradient(135deg, rgba(47, 191, 154, 0.13), transparent 34%),
+        linear-gradient(110deg, #ffffff 0%, #ffffff 64%, #eef8f7 100%);
+      box-shadow: 0 18px 48px rgba(9, 47, 63, 0.14);
+      break-inside: avoid;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(19, 124, 135, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(19, 124, 135, 0.08) 1px, transparent 1px);
+      background-size: 8mm 8mm;
+      mask-image: linear-gradient(90deg, transparent 0%, black 45%, transparent 100%);
+      opacity: 0.55;
+    }
+
+    .stripe {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 13.2mm;
+      background: linear-gradient(180deg, var(--navy), var(--teal));
+    }
+
+    .stripe::after {
+      content: "";
+      position: absolute;
+      left: 8.8mm;
+      top: -12mm;
+      width: 17mm;
+      height: 78mm;
+      background: rgba(47, 191, 154, 0.22);
+      transform: rotate(10deg);
+    }
+
+    .brand {
+      position: absolute;
+      left: 5mm;
+      top: 5mm;
+      z-index: 2;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      color: white;
+      font-weight: 800;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      padding: 5.2mm 5.2mm 4.8mm 18mm;
+      display: grid;
+      grid-template-columns: 22mm 1fr;
+      grid-template-rows: auto 1fr auto;
+      gap: 3.4mm 4.2mm;
+    }
+
+    .top {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4mm;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 2mm;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .mark {
+      width: 8mm;
+      height: 8mm;
+      display: grid;
+      place-items: center;
+      border-radius: 2mm;
+      background: var(--teal);
+      color: white;
+      box-shadow: 0 4px 12px rgba(19, 124, 135, 0.28);
+      font-size: 12px;
+    }
+
+    .chip {
+      width: 11mm;
+      height: 8mm;
+      border-radius: 1.6mm;
+      background:
+        linear-gradient(90deg, transparent 31%, rgba(9, 47, 63, 0.18) 31% 34%, transparent 34% 66%, rgba(9, 47, 63, 0.18) 66% 69%, transparent 69%),
+        linear-gradient(#ffe2a0, #f4bd4d);
+      border: 1px solid rgba(9, 47, 63, 0.2);
+    }
+
+    .avatar {
+      width: 22mm;
+      height: 27mm;
+      border-radius: 3.2mm;
+      border: 1px solid rgba(19, 124, 135, 0.25);
+      background:
+        radial-gradient(circle at 50% 33%, #dff5f0 0 18%, transparent 19%),
+        radial-gradient(circle at 50% 92%, #c5ece4 0 36%, transparent 37%),
+        linear-gradient(135deg, #f9fdfc, #e7f5f3);
+      display: grid;
+      place-items: end center;
+      color: var(--teal);
+      font-weight: 900;
+      font-size: 18px;
+      padding-bottom: 3mm;
+    }
+
+    .details {
+      min-width: 0;
+      align-self: center;
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 1.6mm;
+      margin-bottom: 2mm;
+      padding: 1mm 2.2mm;
+      border-radius: 999px;
+      background: rgba(19, 124, 135, 0.1);
+      color: var(--teal);
+      font-size: 7px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .label::before {
+      content: "";
+      width: 1.6mm;
+      height: 1.6mm;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .name {
+      margin: 0;
+      color: var(--navy);
+      font-size: 17px;
+      line-height: 1.05;
+      font-weight: 900;
+    }
+
+    .role {
+      margin: 1.4mm 0 0;
+      color: var(--muted);
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .meta {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 16mm;
+      gap: 4mm;
+      align-items: end;
+    }
+
+    .fields {
+      display: grid;
+      gap: 1.4mm;
+      color: var(--muted);
+      font-size: 7.4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .fields span {
+      display: block;
+      color: var(--ink);
+      font-size: 8px;
+      letter-spacing: 0.04em;
+      margin-top: 0.4mm;
+    }
+
+    .qr {
+      width: 14mm;
+      height: 14mm;
+      padding: 1mm;
+      border-radius: 2mm;
+      background:
+        linear-gradient(90deg, var(--navy) 0 22%, transparent 22% 38%, var(--navy) 38% 52%, transparent 52% 70%, var(--navy) 70% 100%),
+        linear-gradient(var(--navy) 0 18%, transparent 18% 31%, var(--navy) 31% 47%, transparent 47% 63%, var(--navy) 63% 100%);
+      background-blend-mode: multiply;
+      opacity: 0.88;
+    }
+
+    .footer {
+      position: absolute;
+      left: 18mm;
+      right: 5.2mm;
+      bottom: 3mm;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      color: rgba(9, 47, 63, 0.5);
+      font-size: 6.4px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .accent {
+      position: absolute;
+      right: -12mm;
+      bottom: -22mm;
+      width: 48mm;
+      height: 42mm;
+      border-radius: 50%;
+      background: rgba(243, 184, 76, 0.18);
+    }
+
+    .accent.two {
+      right: 12mm;
+      bottom: -30mm;
+      background: rgba(47, 191, 154, 0.14);
+    }
+
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .page {
+        padding: 0;
+      }
+
+      .intro {
+        display: none;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, 85.6mm);
+        gap: 8mm;
+      }
+
+      .card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="intro">
+      <h1>CashCraft Team ID Cards</h1>
+      <p>Each card is 85.6mm x 53.98mm, matching the standard Egyptian national ID card size ratio.</p>
+    </section>
+
+    <section class="grid" aria-label="CashCraft team ID cards">
+      <article class="card">
+        <div class="stripe"></div>
+        <div class="accent"></div>
+        <div class="accent two"></div>
+        <div class="brand">CashCraft</div>
+        <div class="content">
+          <div class="top"><div class="logo"><span class="mark">$</span> CashCraft</div><div class="chip"></div></div>
+          <div class="avatar">MM</div>
+          <div class="details"><div class="label">Team Member</div><h2 class="name">Mostafa Mohamed</h2><p class="role">Team Leader</p></div>
+          <div class="meta"><div class="fields"><div>Project<span>Financial Learning Platform</span></div><div>Department<span>Capstone Team</span></div></div><div class="qr"></div></div>
+        </div>
+        <div class="footer"><span>ID-01</span><span>White Mode</span></div>
+      </article>
+
+      <article class="card">
+        <div class="stripe"></div>
+        <div class="accent"></div>
+        <div class="accent two"></div>
+        <div class="brand">CashCraft</div>
+        <div class="content">
+          <div class="top"><div class="logo"><span class="mark">$</span> CashCraft</div><div class="chip"></div></div>
+          <div class="avatar">SH</div>
+          <div class="details"><div class="label">Team Member</div><h2 class="name">Safiya Hossam</h2><p class="role">Backend Developer</p></div>
+          <div class="meta"><div class="fields"><div>Project<span>Financial Learning Platform</span></div><div>Department<span>Engineering</span></div></div><div class="qr"></div></div>
+        </div>
+        <div class="footer"><span>ID-02</span><span>White Mode</span></div>
+      </article>
+
+      <article class="card">
+        <div class="stripe"></div>
+        <div class="accent"></div>
+        <div class="accent two"></div>
+        <div class="brand">CashCraft</div>
+        <div class="content">
+          <div class="top"><div class="logo"><span class="mark">$</span> CashCraft</div><div class="chip"></div></div>
+          <div class="avatar">HA</div>
+          <div class="details"><div class="label">Team Member</div><h2 class="name">Habiba Amr</h2><p class="role">Frontend Developer</p></div>
+          <div class="meta"><div class="fields"><div>Project<span>Financial Learning Platform</span></div><div>Department<span>Interface Design</span></div></div><div class="qr"></div></div>
+        </div>
+        <div class="footer"><span>ID-03</span><span>White Mode</span></div>
+      </article>
+
+      <article class="card">
+        <div class="stripe"></div>
+        <div class="accent"></div>
+        <div class="accent two"></div>
+        <div class="brand">CashCraft</div>
+        <div class="content">
+          <div class="top"><div class="logo"><span class="mark">$</span> CashCraft</div><div class="chip"></div></div>
+          <div class="avatar">AM</div>
+          <div class="details"><div class="label">Team Member</div><h2 class="name">AbdelSalam Mohamed</h2><p class="role">Tester</p></div>
+          <div class="meta"><div class="fields"><div>Project<span>Financial Learning Platform</span></div><div>Department<span>Quality Assurance</span></div></div><div class="qr"></div></div>
+        </div>
+        <div class="footer"><span>ID-04</span><span>White Mode</span></div>
+      </article>
+
+      <article class="card">
+        <div class="stripe"></div>
+        <div class="accent"></div>
+        <div class="accent two"></div>
+        <div class="brand">CashCraft</div>
+        <div class="content">
+          <div class="top"><div class="logo"><span class="mark">$</span> CashCraft</div><div class="chip"></div></div>
+          <div class="avatar">ZH</div>
+          <div class="details"><div class="label">Team Member</div><h2 class="name">Zeyad Hamdy</h2><p class="role">Researcher</p></div>
+          <div class="meta"><div class="fields"><div>Project<span>Financial Learning Platform</span></div><div>Department<span>Research</span></div></div><div class="qr"></div></div>
+        </div>
+        <div class="footer"><span>ID-05</span><span>White Mode</span></div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

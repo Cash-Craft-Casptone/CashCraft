@@ -142,11 +142,12 @@ export default function FeedbackPage() {
   if (!currentUser) return null
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${isAr ? "rtl" : "ltr"}`}>
+    <div className={`cc-page-shell ${isAr ? "rtl" : "ltr"}`}>
       <Navbar />
-      <div className="max-w-2xl mx-auto px-4 py-8 pt-32">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#084f5a] dark:text-emerald-400 flex items-center gap-3">
+      <div className="mx-auto max-w-2xl px-4 py-8 pt-32">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="cc-page-header mb-6">
+          <span className="cc-kicker mb-4">{isAr ? "صوتك مهم" : "Your voice matters"}</span>
+          <h1 className="flex items-center gap-3 text-2xl font-extrabold text-foreground sm:text-4xl">
             <MessageSquare className="w-7 h-7" />
             {isAr ? "التقييمات والملاحظات" : "Feedback"}
           </h1>

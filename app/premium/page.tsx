@@ -53,28 +53,28 @@ export default function PremiumPage() {
   }
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${isAr ? "rtl" : "ltr"}`}>
+    <div className={`cc-page-shell ${isAr ? "rtl" : "ltr"}`}>
       <Navbar />
-      <div className="max-w-5xl mx-auto px-4 pt-28 sm:pt-32 pb-16">
+      <div className="cc-container max-w-5xl px-4 pb-16 pt-28 sm:pt-32">
 
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="cc-page-header mb-10 text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
+            <div className="cc-icon-tile h-16 w-16">
               <Crown className="w-10 h-10 text-yellow-500" />
             </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#084f5a] dark:text-white mb-3">
+          <h1 className="mb-3 text-3xl font-extrabold text-foreground sm:text-5xl">
             {isAr ? "اختر خطتك" : "Choose Your Plan"}
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-lg">
+          <p className="text-lg text-muted-foreground">
             {isAr ? "استثمر في مستقبلك المالي" : "Invest in your financial future"}
           </p>
         </motion.div>
 
         {/* Billing Toggle */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="flex items-center justify-center gap-4 mb-10">
+          className="cc-toolbar mx-auto mb-10 flex w-fit items-center justify-center gap-4 px-4 py-3">
           <span className={`text-sm font-medium ${billing === "monthly" ? "text-[#084f5a] dark:text-white" : "text-gray-400"}`}>
             {isAr ? "شهري" : "Monthly"}
           </span>
@@ -101,8 +101,8 @@ export default function PremiumPage() {
           {/* Silver Card */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             onClick={() => setSelected("silver")}
-            className={`relative rounded-2xl border-2 p-6 cursor-pointer transition-all duration-200 bg-white dark:bg-gray-800 ${
-              selected === "silver" ? "border-[#6099a5] shadow-lg" : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
+            className={`cc-card relative cursor-pointer p-6 ${
+              selected === "silver" ? "border-primary shadow-lg" : "border-border hover:border-primary/40"
             }`}>
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-xl">
@@ -145,10 +145,10 @@ export default function PremiumPage() {
           {/* Platinum Card - DECOY: visually dominant */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             onClick={() => setSelected("platinum")}
-            className={`relative rounded-2xl border-2 p-6 cursor-pointer transition-all duration-200 ${
+            className={`relative cursor-pointer rounded-2xl border-2 p-6 transition-all duration-200 ${
               selected === "platinum"
-                ? "border-[#084f5a] shadow-2xl bg-gradient-to-br from-[#084f5a] to-[#0a6b7a] text-white scale-[1.02]"
-                : "border-[#084f5a]/40 shadow-xl bg-gradient-to-br from-[#084f5a] to-[#0a6b7a] text-white hover:scale-[1.01]"
+                ? "border-yellow-400 bg-gradient-to-br from-[#082f3f] to-[#137c87] text-white shadow-2xl scale-[1.02]"
+                : "border-primary/40 bg-gradient-to-br from-[#082f3f] to-[#137c87] text-white shadow-xl hover:scale-[1.01]"
             }`}>
 
             {/* Recommended badge */}
@@ -205,7 +205,7 @@ export default function PremiumPage() {
 
         {/* Free tier note */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-          className="text-center mt-8 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-xl max-w-3xl mx-auto">
+          className="mx-auto mt-8 max-w-3xl rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-center shadow-sm dark:border-amber-700/60 dark:bg-amber-900/20">
           <p className="text-sm text-orange-700 dark:text-orange-400 font-medium">
             📺 {isAr ? "المستخدمون المجانيون يشاهدون إعلانات على الفيديوهات" : "Free tier users see ads on videos"}
           </p>

@@ -70,23 +70,23 @@ export default function QuizPage() {
   )
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+    <div className={`cc-page-shell ${language === "ar" ? "rtl" : "ltr"}`}>
       <Navbar />
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-8">
+      <div className="cc-container px-3 pb-10 pt-24 sm:px-6 sm:pt-32 lg:px-8">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-4 sm:mb-12">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="cc-page-header mb-4 text-center sm:mb-8">
           <div className="flex justify-center mb-3 sm:mb-6">
-            <div className="p-3 sm:p-4 bg-teal-100 dark:bg-teal-900/30 rounded-full">
-              <Brain className="w-8 h-8 sm:w-12 sm:h-12 text-teal-600 dark:text-teal-400" />
+            <div className="cc-icon-tile h-16 w-16">
+              <Brain className="h-9 w-9" />
             </div>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-bold text-[#084f5a] dark:text-white mb-2 sm:mb-4">{t.financialQuizzes}</h1>
-          <p className="text-sm sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto hidden sm:block">{t.financialQuizzesDesc}</p>
+          <h1 className="mb-2 text-3xl font-extrabold text-foreground sm:mb-4 sm:text-5xl">{t.financialQuizzes}</h1>
+          <p className="mx-auto hidden max-w-3xl text-sm text-muted-foreground sm:block sm:text-xl">{t.financialQuizzesDesc}</p>
         </motion.div>
 
         {/* Progress Overview - compact on mobile */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 mb-4 sm:mb-8 shadow-lg">
+          className="cc-toolbar mb-4 p-3 sm:mb-8 sm:p-6">
           <div className="grid grid-cols-3 gap-2 sm:gap-6">
             {[
               { icon: <Trophy className="w-5 h-5 sm:w-8 sm:h-8 text-yellow-500" />, value: completedQuizzes.length, label: t.completedQuizzes },
@@ -106,7 +106,7 @@ export default function QuizPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
           {quizLevels.map((quiz, index) => (
             <motion.div key={quiz.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
-              className={`bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 shadow-lg border-2 transition-all ${
+              className={`cc-card p-3 sm:p-6 ${
                 quiz.completed ? "border-green-200 dark:border-green-800"
                 : quiz.unlocked ? "border-teal-200 dark:border-teal-800 hover:border-teal-300"
                 : "border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed"}`}>
@@ -144,7 +144,7 @@ export default function QuizPage() {
 
               {quiz.unlocked ? (
                 <Link href={`/quiz/${quiz.id}`} className="block">
-                  <Button className="w-full bg-[#6099a5] hover:bg-[#084f5a] text-white text-xs sm:text-sm h-8 sm:h-10">
+                  <Button className="h-8 w-full text-xs sm:h-10 sm:text-sm">
                     {quiz.completed ? t.retakeQuiz : t.startQuiz}
                   </Button>
                 </Link>

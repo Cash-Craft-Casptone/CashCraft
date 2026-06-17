@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { ArrowLeft, Trophy, Target, BookOpen, Share2, RotateCcw } from "lucide-react"
 
 interface QuizResult {
@@ -23,15 +23,17 @@ interface QuizResult {
   }>
 }
 
-export default function QuizResults({ params }: { params: { id: string } }) {
+export default function QuizResults() {
   const router = useRouter()
+  const params = useParams()
+  const quizId = params.id as string
   const [result, setResult] = useState<QuizResult | null>(null)
   const [language, setLanguage] = useState("en")
 
   useEffect(() => {
     // Mock quiz result data
     const mockResult: QuizResult = {
-      id: params.id,
+      id: quizId,
       title: language === "ar" ? "أساسيات الميزانية" : "Budgeting Basics",
       score: 85,
       totalQuestions: 10,
@@ -67,7 +69,7 @@ export default function QuizResults({ params }: { params: { id: string } }) {
       ],
     }
     setResult(mockResult)
-  }, [params.id, language])
+  }, [quizId, language])
 
   if (!result) {
     return (
@@ -233,7 +235,7 @@ export default function QuizResults({ params }: { params: { id: string } }) {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <button
-            onClick={() => router.push(`/quiz/${params.id}`)}
+            onClick={() => router.push(`/quiz/${quizId}`)}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
           >
             <RotateCcw className="w-5 h-5" />

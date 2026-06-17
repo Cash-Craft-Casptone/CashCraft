@@ -1171,9 +1171,9 @@ export default function Dashboard() {
   // Check if user is logged in
   if (!currentUser || !localStorage.getItem('cashcraft_accessToken')) {
     return (
-      <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <div className={`cc-page-shell ${language === "ar" ? "rtl" : "ltr"}`}>
         <Navbar />
-        <div className="max-w-7xl mx-auto p-6 pt-32">
+        <div className="cc-container p-6 pt-32">
           <div className="text-center py-20">
             <h2 className="text-2xl font-semibold text-gray-700 dark:text-emerald-300 mb-4">
               {t.pleaseLogIn}
@@ -1208,9 +1208,9 @@ export default function Dashboard() {
   // If no active plan, show a simple message
   if (!activePlan) {
     return (
-      <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+      <div className={`cc-page-shell ${language === "ar" ? "rtl" : "ltr"}`}>
         <Navbar />
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 pt-28 sm:pt-32">
+        <div className="cc-container p-4 pt-28 sm:p-6 sm:pt-32">
           <div className="text-center py-10 sm:py-20">
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 dark:text-emerald-300 mb-4">
               {t.noBudgetPlanFound}
@@ -1483,9 +1483,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={`min-h-screen bg-[#f8f9fa] dark:bg-gray-950 ${language === "ar" ? "rtl" : "ltr"}`}>
+    <div className={`cc-page-shell ${language === "ar" ? "rtl" : "ltr"}`}>
       <Navbar />
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 pt-28 sm:pt-32">
+      <div className="cc-container p-4 pt-28 sm:p-6 sm:pt-32">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
